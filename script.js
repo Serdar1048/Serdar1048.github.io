@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProjectId = id;
 
         // Populate Sim Data
-        simTitle.textContent = project.title;
-        simGithub.href = project.github;
+        if (simTitle) simTitle.textContent = project.title;
+        if (simGithub) simGithub.href = project.github;
 
         // Setup "View Report" buttons
         btnViewReport.onclick = () => openReport(id);
