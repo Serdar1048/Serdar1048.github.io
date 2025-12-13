@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reportImage.src = project.image;
 
         // Render Markdown
-        const htmlContent = marked.parse(project.details);
+        const htmlContent = marked.parse(project.details, { breaks: true });
         reportContent.innerHTML = htmlContent;
 
         // Generate TOC
