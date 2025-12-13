@@ -131,6 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reportTitle.textContent = project.title;
         reportImage.src = project.image;
 
+        // Add GitHub Markdown Style Class
+        reportContent.classList.add('markdown-body');
+
         // Render Markdown
         const htmlContent = marked.parse(project.details, { breaks: true });
         reportContent.innerHTML = htmlContent;
