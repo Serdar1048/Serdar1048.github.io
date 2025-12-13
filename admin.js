@@ -258,7 +258,7 @@ async function pushToGithub() {
     }
 }
 
-// File Upload Handler
+// Handle Text File Upload
 function handleFileUpload(input) {
     const file = input.files[0];
     if (!file) return;
@@ -268,4 +268,28 @@ function handleFileUpload(input) {
         document.getElementById('edit-details').value = e.target.result;
     };
     reader.readAsText(file);
+}
+
+// Handle Image Insertion (Base64)
+function insertImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Check size (Max 1MB recommended for Base64 performance)
+    if (file.size > 1024 * 1024) {
+        if (!confirm("Bu resim büyük (>1MB). Sayfa yavaşlayabilir. Yine de eklensin mi?")) return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const base64 = e.target.result;
+        const textarea = document.getElementById('edit-details');
+        const cursor = textarea.selectionStart;
+        const text = textarea.value;
+        const markdownImage = `\n![${file.name}](${base64})\n`;
+
+        // Insert at cursor
+        textarea.value = text.slice(0, cursor) + markdownImage + text.slice(cursor);
+    };
+    reader.readAsDataURL(file);
 }

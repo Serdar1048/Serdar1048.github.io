@@ -125,12 +125,19 @@
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-700">Detaylar (Markdown)</label>
-                            <label
-                                class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
-                                <span>📄 MD Dosyası Yükle</span>
-                                <input type="file" id="md-upload" accept=".md,.txt" class="hidden"
-                                    onchange="handleFileUpload(this)">
-                            </label>
+                            <div class="flex gap-2">
+                                <label
+                                    class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
+                                    <span>🖼️ Resim Ekle</span>
+                                    <input type="file" accept="image/*" class="hidden" onchange="insertImage(this)">
+                                </label>
+                                <label
+                                    class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
+                                    <span>📄 MD Yükle</span>
+                                    <input type="file" id="md-upload" accept=".md,.txt" class="hidden"
+                                        onchange="handleFileUpload(this)">
+                                </label>
+                            </div>
                         </div>
                         <textarea id="edit-details" rows="12"
                             class="w-full px-3 py-2 border rounded-lg font-mono text-sm"
