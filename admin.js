@@ -258,16 +258,91 @@ async function pushToGithub() {
     }
 }
 
-// Handle Text File Upload
-function handleFileUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
+// Handle Folder/File Upload (MD + Images Auto Link)
+async function handleFolderUpload(input) {
+    const files = Array.from(input.files);
+    if (files.length === 0) return;
+
+    // Find the MD file
+    const mdFile = files.find(f => f.name.endsWith('.md') || f.name.endsWith('.txt'));
+    if (!mdFile) {
+        alert("Klasörde .md veya .txt uzantılı bir rapor dosyası bulunamadı!");
+        return;
+    }
+
+    // Map images for quick access: "image.png" -> File Object
+    const imageMap = {};
+    files.forEach(f => {
+        if (f.type.startsWith('image/')) {
+            imageMap[f.name] = f;
+            // Also map with relative paths if user used subfolders like "images/pic.png" - simplified to match filename only
+        }
+    });
 
     const reader = new FileReader();
-    reader.onload = function (e) {
-        document.getElementById('edit-details').value = e.target.result;
+    reader.onload = async function (e) {
+        let mdContent = e.target.result;
+
+        // Regex to find image links: ![alt](path)
+        // We look for plain paths, not http:// links
+        const imgRegex = /!\[(.*?)\]\((.*?)\)/g;
+        let match;
+        const replacements = [];
+
+        // Identify all matches first
+        while ((match = imgRegex.exec(mdContent)) !== null) {
+            const originalTag = match[0]; // ![alt](path)
+            const altText = match[1];
+            const imagePath = match[2];
+
+            // Skip external links
+            if (imagePath.startsWith('http')) continue;
+
+            // Extract filename from path (e.g. "assets/img.png" -> "img.png")
+            const filename = imagePath.split('/').pop().split('\\').pop();
+
+            if (imageMap[filename]) {
+                replacements.push({
+                    originalTag,
+                    file: imageMap[filename],
+                    altText
+                });
+            }
+        }
+
+        if (replacements.length > 0) {
+            const statusLabel = document.querySelector('label[for="folder-upload"] span');
+            if (statusLabel) statusLabel.textContent = "⏳ İşleniyor...";
+
+            // Process all images
+            for (const item of replacements) {
+                try {
+                    const base64 = await readFileAsBase64(item.file);
+                    // Replace the Original Tag with Base64 version
+                    // Careful with global replace if same image used twice, but usually safe
+                    mdContent = mdContent.split(item.originalTag).join(`![${item.altText}](${base64})`);
+                } catch (err) {
+                    console.error("Resim dönüştürme hatası:", item.file.name, err);
+                }
+            }
+
+            if (statusLabel) statusLabel.textContent = "📁 Klasör Yükle (MD+Resim)";
+            alert(`${replacements.length} adet resim başarıyla MD dosyasına gömüldü!`);
+        }
+
+        document.getElementById('edit-details').value = mdContent;
     };
-    reader.readAsText(file);
+    reader.readAsText(mdFile);
+}
+
+// Helper: Promisified FileReader
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 // Handle Image Insertion (Base64)
