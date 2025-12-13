@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBackToSim.onclick = () => openSimulation(id);
 
         // Populate Report Data
-        reportTitleTop.textContent = project.title;
+        // reportTitleTop removed from UI
         reportTitle.textContent = project.title;
         reportImage.src = project.image;
 
