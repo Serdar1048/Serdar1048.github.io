@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnViewReport2.onclick = () => openReport(id);
 
         // Frame
-        if (project.demo_url) {
+        if (project.demo_url && (project.demo_url.startsWith('http://') || project.demo_url.startsWith('https://'))) {
             detailFrame.src = project.demo_url;
             detailFrame.classList.remove('hidden');
             detailNoDemo.classList.add('hidden');
