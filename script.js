@@ -52,17 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onpopstate = (event) => {
         if (event.state && event.state.section) {
             if (event.state.section === 'detail') {
-                // Re-open simulation if ID is present, else just show detail (might be empty if reloaded)
-                if (event.state.id) openSimulation(event.state.id); // This might cause loop if not careful, but openSimulation pushes state. 
-                // Better: just show section if data is there. But openSimulation sets data.
-                // Ideally, we should separate data fetching from view switching.
-                // For now, simple section switch:
-                // Actually, we need to re-populate data if valid ID
+                // Re-open simulation if ID is present
                 if (event.state.id) {
-                    // We need to avoid pushing state again inside openSimulation if called from popstate
-                    // But openSimulation logic is coupled. 
-                    // Let's just fix the basic navigation first.
-                    // A simple approach:
+                    openSimulation(event.state.id, false);
+                    return; // Stop here, openSimulation handles showSection
+                }
+            } else if (event.state.section === 'report') {
+                if (event.state.id) {
+                    openReport(event.state.id, false);
+                    return;
                 }
             }
             // Simple fallback for now
@@ -123,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STEP 1: Open Simulation View ---
     // --- STEP 1: Open Simulation View ---
-    window.openSimulation = (id) => {
+    // --- STEP 1: Open Simulation View ---
+    window.openSimulation = (id, shouldPushState = true) => {
         const project = allProjects.find(p => p.id === id);
         if (!project) return;
 
@@ -131,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Populate Sim Data
         if (simTitle) simTitle.textContent = project.title;
-        // if (simGithub) simGithub.href = project.github; // Removed old element
 
         // Setup "View Report" button
         if (btnViewReport) btnViewReport.onclick = () => openReport(id);
@@ -139,7 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Setup "View Code" button (GitHub)
         const btnViewCode = document.getElementById('btn-view-code');
-        if (btnViewCode) btnViewCode.href = project.github || '#';
+        if (btnViewCode) {
+            let ghLink = project.github || '#';
+            // Ensure http/s protocol if missing and not just '#'
+            if (ghLink !== '#' && !/^https?:\/\//i.test(ghLink)) {
+                ghLink = 'https://' + ghLink;
+            }
+            btnViewCode.href = ghLink;
+        }
 
         // Frame
         if (project.demo_url && (project.demo_url.startsWith('http://') || project.demo_url.startsWith('https://'))) {
@@ -153,17 +158,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showSection('detail');
-        // Add to history
-        history.pushState({ section: 'detail', id: id }, '', '#project-' + id);
+        // Add to history only if requested (default true)
+        if (shouldPushState) {
+            history.pushState({ section: 'detail', id: id }, '', '#project-' + id);
+        }
     };
 
     // --- STEP 2: Open Report View ---
-    window.openReport = (id) => {
+    // --- STEP 2: Open Report View ---
+    window.openReport = (id, shouldPushState = true) => {
         const project = allProjects.find(p => p.id === id);
         if (!project) return;
 
-        // Setup Back Button
-        btnBackToSim.onclick = () => openSimulation(id);
+        // Setup Back Button for Report View
+        // If we came here via pushState, Back should pop. 
+        // If we want a dedicated button to go back to simulation:
+        btnBackToSim.onclick = () => {
+            // If history has report state, back() pops it and returns to detail
+            if (history.state && history.state.section === 'report') {
+                history.back();
+            } else {
+                openSimulation(id, true);
+            }
+        };
 
         // Populate Report Data
         const reportTitleTop = document.getElementById('report-title-top');
@@ -183,6 +200,23 @@ document.addEventListener('DOMContentLoaded', () => {
         generateTOC();
 
         showSection('report');
+
+        if (shouldPushState) {
+            history.pushState({ section: 'report', id: id }, '', '#report-' + id);
+        }
+    };
+
+    // Generic Go Back Function for UI Buttons
+    window.goBack = () => {
+        if (history.state && (history.state.section === 'detail' || history.state.section === 'report')) {
+            history.back();
+        } else {
+            showSection('portfolio');
+            // Ensure URL is clean if we fell back
+            if (window.location.hash.includes('project') || window.location.hash.includes('report')) {
+                history.replaceState(null, '', 'index.html#portfolio');
+            }
+        }
     };
 
     // --- TOC Generator ---
