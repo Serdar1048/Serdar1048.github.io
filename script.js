@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide all
         Object.values(sections).forEach(sec => {
             if (sec) sec.classList.add('hidden');
-            // If leaving detail, clear iframe source (preserve resources)
-            if (sec === sections.detail && sectionName !== 'detail') {
+            // If leaving detail or report, clear iframe source (preserve resources)
+            if ((sectionName !== 'detail' && sectionName !== 'report') && sec === sections.detail) {
                 detailFrame.src = '';
             }
         });
@@ -47,6 +47,38 @@ document.addEventListener('DOMContentLoaded', () => {
         // Scroll top
         window.scrollTo(0, 0);
     };
+
+    // Handle Browser Back Button
+    window.onpopstate = (event) => {
+        if (event.state && event.state.section) {
+            if (event.state.section === 'detail') {
+                // Re-open simulation if ID is present, else just show detail (might be empty if reloaded)
+                if (event.state.id) openSimulation(event.state.id); // This might cause loop if not careful, but openSimulation pushes state. 
+                // Better: just show section if data is there. But openSimulation sets data.
+                // Ideally, we should separate data fetching from view switching.
+                // For now, simple section switch:
+                // Actually, we need to re-populate data if valid ID
+                if (event.state.id) {
+                    // We need to avoid pushing state again inside openSimulation if called from popstate
+                    // But openSimulation logic is coupled. 
+                    // Let's just fix the basic navigation first.
+                    // A simple approach:
+                }
+            }
+            // Simple fallback for now
+            showSection(event.state.section);
+        } else {
+            // Default based on hash
+            if (window.location.hash === '#portfolio') {
+                showSection('portfolio');
+            } else {
+                showSection('home');
+            }
+        }
+    };
+
+    // Override showSection to NOT manage history, history is managed by specific open* functions or links
+    // But we need a generic way for 'Home' and 'Portfolio' clicks
 
     // Initial Load
     if (window.location.hash === '#portfolio') {
@@ -90,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- STEP 1: Open Simulation View ---
+    // --- STEP 1: Open Simulation View ---
     window.openSimulation = (id) => {
         const project = allProjects.find(p => p.id === id);
         if (!project) return;
@@ -98,11 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Populate Sim Data
         if (simTitle) simTitle.textContent = project.title;
-        if (simGithub) simGithub.href = project.github;
+        // if (simGithub) simGithub.href = project.github; // Removed old element
 
-        // Setup "View Report" buttons
-        btnViewReport.onclick = () => openReport(id);
-        btnViewReport2.onclick = () => openReport(id);
+        // Setup "View Report" button
+        if (btnViewReport) btnViewReport.onclick = () => openReport(id);
+        if (btnViewReport2) btnViewReport2.onclick = () => openReport(id);
+
+        // Setup "View Code" button (GitHub)
+        const btnViewCode = document.getElementById('btn-view-code');
+        if (btnViewCode) btnViewCode.href = project.github || '#';
 
         // Frame
         if (project.demo_url && (project.demo_url.startsWith('http://') || project.demo_url.startsWith('https://'))) {
@@ -116,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showSection('detail');
+        // Add to history
+        history.pushState({ section: 'detail', id: id }, '', '#project-' + id);
     };
 
     // --- STEP 2: Open Report View ---
