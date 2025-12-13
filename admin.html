@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolyo Yönetim Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-6 text-center">Yönetici Girişi</h2>
+
+            <div class="relative mb-4">
+                <input type="password" id="admin-pass" placeholder="Şifre Giriniz"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none pr-10">
+                <button type="button" onclick="togglePassword()"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600">
+                    <svg id="eye-icon-off" class="w-5 h-5 block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                        </path>
+                    </svg>
+                    <svg id="eye-icon-on" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <button onclick="checkAuth()"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Giriş Yap</button>
+
+            <div id="login-error"
+                class="hidden mt-3 bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Hatalı şifre! Lütfen tekrar deneyin.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel -->
+    <div id="admin-panel" class="hidden min-h-screen">
+        <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">Panel</h1>
+            <div class="flex gap-4">
+                <button onclick="showProjectList()" class="text-slate-600 hover:text-blue-600">Projeler</button>
+                <a href="index.html" class="text-slate-600 hover:text-blue-600">Siteye Dön</a>
+            </div>
+        </nav>
+
+        <div class="max-w-5xl mx-auto px-6 py-8">
+            <!-- Token Info -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-sm text-blue-800">
+                <strong>Önemli:</strong> Değişiklikleri kaydetmek için <a href="https://github.com/settings/tokens"
+                    target="_blank" class="underline">GitHub Personal Access Token</a> gereklidir.
+                <button onclick="document.getElementById('token-modal').classList.remove('hidden')"
+                    class="ml-2 underline font-bold">Token Gir</button>
+            </div>
+
+            <!-- Project List View -->
+            <div id="view-list">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Projeler</h2>
+                    <button onclick="showEditForm()"
+                        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                        <span>+</span> Yeni Ekle
+                    </button>
+                </div>
+                <div id="admin-projects-grid" class="space-y-4">
+                    <!-- Projects injected here -->
+                </div>
+            </div>
+
+            <!-- Edit Form View -->
+            <div id="view-form" class="hidden">
+                <h2 id="form-title" class="text-2xl font-bold mb-6">Proje Düzenle</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <input type="hidden" id="edit-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Başlık</label>
+                            <input type="text" id="edit-title" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">GitHub Linki</label>
+                            <input type="text" id="edit-github" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Kısa Açıklama</label>
+                        <input type="text" id="edit-desc" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Resim URL</label>
+                            <input type="text" id="edit-image" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Demo/Streamlit URL</label>
+                            <input type="text" id="edit-demo" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-700">Detaylar (Markdown)</label>
+                            <label
+                                class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
+                                <span>📄 MD Dosyası Yükle</span>
+                                <input type="file" id="md-upload" accept=".md,.txt" class="hidden"
+                                    onchange="handleFileUpload(this)">
+                            </label>
+                        </div>
+                        <textarea id="edit-details" rows="12"
+                            class="w-full px-3 py-2 border rounded-lg font-mono text-sm"
+                            placeholder="# Proje Başlığı\n\nDetaylar..."></textarea>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="saveProject()"
+                            class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Kaydet</button>
+                        <button onclick="showProjectList()"
+                            class="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Modal (If not valid) -->
+    <div id="token-modal"
+        class="fixed inset-0 z-50 hidden bg-slate-900/90 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                    <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">GitHub Bağlantısı</h2>
+                <p class="text-slate-500 mt-2 text-sm">Projeleri kaydetmek için GitHub Token'ına ihtiyacımız var.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-blue-50 p-4 rounded-lg text-xs text-blue-800">
+                    <strong>Neden gerekli?</strong> Siteniz statik (GitHub Pages) olduğu için, veritabanı yerine
+                    değişiklikleri direkt GitHub'a 'commit' ediyoruz. Bu token sadece bu işlem için kullanılır.
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">GitHub Personal Access Token</label>
+                    <input type="password" id="token-input"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                        placeholder="ghp_xxxxxxxxxxxx">
+                </div>
+
+                <button onclick="saveToken()"
+                    class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors">
+                    Bağlan ve Devam Et
+                </button>
+
+                <div class="text-center pt-2">
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio%20Admin"
+                        target="_blank" class="text-primary text-sm hover:underline font-medium">
+                        Token Nasıl Alınır? (Tıkla ve Oluştur)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "Şarap Kalitesi Tahmini",
+    "description": "Makine öğrenimi kullanarak şarap kalitesini fiziksel özelliklerine göre tahmin eden bir model.",
+    "image": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=2940&auto=format&fit=crop",
+    "github": "https://github.com/Serdar1048/wine-quality",
+    "demo_url": "https://wine-quality-demo.streamlit.app/?embed=true",
+    "details": "### Proje Hakkında\nBu proje, kırmızı şarapların fiziksel ve kimyasal özelliklerini analiz ederek kalite puanını tahmin eder.\n\n### Kullanılan Teknolojiler\n- Python\n- Scikit-learn\n- Pandas\n- Streamlit\n\n### Model Başarısı\nModel, test verisetinde %85 doğruluk oranına ulaşmıştır."
+  },
+  {
+    "id": 2,
+    "title": "Müşteri Segmentasyonu",
+    "description": "E-ticaret verilerini kullanarak K-Means kümeleme ile müşteri segmentasyonu.",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop",
+    "github": "https://github.com/Serdar1048/customer-segmentation",
+    "demo_url": "",
+    "details": "### Proje Hakkında\nMüşterilerin satın alma alışkanlıklarına göre gruplandırılması.\n\n### Yöntem\nRFM analizi ve K-Means algoritması kullanılarak 4 ana müşteri segmenti belirlenmiştir."
+  }
+]
