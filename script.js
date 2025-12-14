@@ -102,7 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     handleStaticRouting();
 
     // Cache busting: Add timestamp to force fresh fetch
-    fetch('projects.json?t=' + new Date().getTime())
+    // Load Project Data
+    fetch(`projects.json?v=${new Date().getTime()}`)
         .then(response => response.json())
         .then(projects => {
             allProjects = projects;
