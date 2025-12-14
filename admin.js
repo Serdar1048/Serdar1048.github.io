@@ -22,6 +22,33 @@ let editingId = null;
 
 // Auth Check (Renamed from checkLogin)
 // Auth Check
+document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+});
+
+function checkSession() {
+    const session = localStorage.getItem('admin_session');
+    if (session) {
+        // Optional: Check expiry (e.g. 24 hours)
+        const now = Date.now();
+        if (now - parseInt(session) < 24 * 60 * 60 * 1000) {
+            loginScreen.classList.add('hidden');
+
+            // Check Token
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                GITHUB_TOKEN = savedToken;
+                dashboard.classList.remove('hidden');
+                fetchProjects();
+            } else {
+                tokenModal.classList.remove('hidden');
+            }
+        } else {
+            localStorage.removeItem('admin_session'); // Expired
+        }
+    }
+}
+
 async function checkAuth() {
     const passwordInput = document.getElementById('admin-pass');
     const password = passwordInput.value;
@@ -36,6 +63,9 @@ async function checkAuth() {
     if (hashHex === ADMIN_HASH) {
         errorMsg.classList.add('hidden'); // Hide error if success
         loginScreen.classList.add('hidden');
+
+        // Save Session
+        localStorage.setItem('admin_session', Date.now());
 
         // Check for GitHub Token
         const savedToken = localStorage.getItem('github_token');
@@ -93,6 +123,14 @@ function saveToken() {
 }
 
 // Token Management (Removed setGithubToken as it's replaced by the modal flow)
+
+// Logout Function
+window.logout = () => {
+    if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+        localStorage.removeItem('admin_session');
+        location.reload();
+    }
+};
 
 // Load Projects (Renamed from loadProjects)
 async function fetchProjects() {
