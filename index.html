@@ -45,6 +45,17 @@
                         class="text-slate-600 hover:text-primary transition-colors">Projeler</button>
                     <a href="https://github.com/Serdar1048" target="_blank"
                         class="text-slate-600 hover:text-primary transition-colors">GitHub</a>
+                    <a href="https://www.linkedin.com/in/serdar-dedeba%C5%9F/" target="_blank"
+                        class="text-slate-600 hover:text-primary transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </a>
+                    <button onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})"
+                        class="px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-full hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                        Hakkımda
+                    </button>
                 </div>
             </div>
         </div>
@@ -53,23 +64,92 @@
     <!-- Main Content Wrapper -->
     <main class="flex-grow">
 
-        <!-- Hero Section -->
-        <section id="home" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <div class="text-center max-w-3xl mx-auto">
-                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight">
-                    Veriyle Hikaye Anlatan <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Python
-                        Geliştiricisi</span>
-                </h1>
-                <p class="text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed">
-                    Makine öğrenimi, derin öğrenme ve veri analitiği alanlarında çözümler üretiyorum.
-                    Projelerimi aşağıda inceleyebilir ve interaktif demoları deneyebilirsiniz.
-                </p>
-                <div class="flex justify-center gap-4">
-                    <a href="#portfolio" onclick="showSection('portfolio')"
-                        class="px-8 py-3 bg-primary text-white rounded-full font-medium hover:bg-blue-600 transition-shadow shadow-lg shadow-blue-500/30">
-                        Projelerimi İncele
-                    </a>
+        <!-- Modern Hero Section -->
+        <section id="home" class="relative pt-32 pb-20 overflow-hidden">
+            <!-- Background Elements -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+                <div
+                    class="absolute -top-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-tr from-blue-100/40 to-purple-100/40 blur-3xl animate-blob">
+                </div>
+                <div
+                    class="absolute top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-indigo-100/40 to-blue-50/40 blur-3xl animate-blob animation-delay-2000">
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="text-center max-w-4xl mx-auto">
+                    <span
+                        class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold mb-6 border border-blue-100">
+                        👋 Hoş Geldiniz, Ben Serdar
+                    </span>
+                    <h1 class="text-5xl md:text-7xl font-bold text-slate-900 mb-8 tracking-tight leading-tight">
+                        Veriyle <span
+                            class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Geleceği</span>
+                        <br>
+                        İnşa Ediyorum
+                    </h1>
+                    <p class="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+                        Karmaşık verileri anlamlı içgörülere dönüştürüyor, yapay zeka ve modern teknolojilerle
+                        ölçeklenebilir çözümler geliştiriyorum.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="#portfolio" onclick="showSection('portfolio')"
+                            class="px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2">
+                            Projelerimi Keşfet
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </a>
+                        <button onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})"
+                            class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                            Hakkımda
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
+                    <div class="relative">
+                        <div
+                            class="aspect-square rounded-2xl overflow-hidden bg-slate-100 shadow-xl rotate-3 hover:rotate-0 transition-transform duration-500">
+                            <!-- Placeholder for profile image if user provides one later -->
+                            <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
+                                <span class="text-4xl">SD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-6">Hakkımda</h2>
+                        <div class="prose prose-slate text-slate-600">
+                            <p class="mb-4">
+                                Merhaba! Ben Serdar. Veri Bilimi ve Yapay Zeka alanında tutkulu bir geliştiriciyim.
+                                Karmaşık problemleri veri odaklı yaklaşımlarla çözmekten ve kullanıcı dostu arayüzlerle
+                                sunmaktan keyif alıyorum.
+                            </p>
+                            <p class="mb-4">
+                                Geniş bir yelpazede projeler geliştiriyorum; makine öğrenimi modellerinden, bunları
+                                canlıya alan web uygulamalarına kadar
+                                uçtan uca çözümler üretiyorum.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-8">
+                                <span
+                                    class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">Python</span>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">Machine
+                                    Learning</span>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">Deep
+                                    Learning</span>
+                                <span
+                                    class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">Streamlit</span>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">Data
+                                    Visualization</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -77,11 +157,27 @@
         <!-- Portfolio Section -->
         <section id="portfolio" class="py-20 bg-slate-100/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">Seçilmiş Projeler</h2>
-                    <p class="text-slate-600 max-w-2xl mx-auto">
-                        Kişisel çalışmalarımdan ve açık kaynak katkılarımdan bazıları.
-                    </p>
+                <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-4">Projeler</h2>
+                        <p class="text-slate-600 max-w-2xl">
+                            Gerçek dünya problemlerine çözüm üreten çalışmalarım.
+                        </p>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="w-full md:w-72 relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" id="project-search"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                            placeholder="Proje ara...">
+                    </div>
                 </div>
 
                 <!-- Projects Grid -->
@@ -94,10 +190,10 @@
 
 
         <!-- Simulation / Detail Section -->
-        <section id="project-detail" class="hidden min-h-screen bg-white pt-20">
+        <section id="project-detail" class="hidden min-h-screen bg-white pt-16">
             <!-- Navigation / Toolbar -->
             <div
-                class="sticky top-20 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm">
+                class="sticky top-16 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm">
                 <button onclick="goBack()"
                     class="flex items-center gap-2 text-slate-600 hover:text-primary transition-colors font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,46 +226,50 @@
             </div>
 
             <!-- Simulation / Iframe Area -->
-            <div class="w-full h-[85vh] bg-slate-100 relative">
-                <iframe id="detail-frame" src="" class="w-full h-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
+            <div class="flex-1 w-full h-[calc(100vh-8rem)] bg-slate-50 relative p-4 lg:p-8">
+                <div
+                    class="w-full h-full bg-white rounded-2xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-200/60 relative">
+                    <iframe id="detail-frame" src="" class="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
 
-                <!-- No Demo Placeholder -->
-                <div id="detail-no-demo"
-                    class="absolute inset-0 flex items-center justify-center bg-slate-100 z-10 hidden">
-                    <div class="text-center p-8">
-                        <div class="bg-white p-4 rounded-full shadow-sm inline-block mb-4">
-                            <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    <!-- No Demo Placeholder -->
+                    <div id="detail-no-demo"
+                        class="absolute inset-0 flex items-center justify-center bg-slate-100 z-10 hidden">
+                        <div class="text-center p-8">
+                            <div class="bg-white p-4 rounded-full shadow-sm inline-block mb-4">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-slate-900">İnteraktif Demo Yok</h3>
+                            <p class="text-slate-500">Bu proje için simülasyon bulunmuyor.</p>
+                            <button id="btn-view-report-2"
+                                class="mt-4 px-6 py-2 bg-primary text-white rounded-full hover:bg-blue-700 transition">Raporu
+                                İncele</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="detail-loader"
+                        class="absolute inset-0 flex items-center justify-center bg-slate-100 z-20 hidden">
+                        <div class="flex flex-col items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-primary"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4">
+                                </circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                 </path>
                             </svg>
+                            <p class="mt-4 text-slate-600 font-medium animate-pulse">Simülasyon Yükleniyor...</p>
                         </div>
-                        <h3 class="text-lg font-medium text-slate-900">İnteraktif Demo Yok</h3>
-                        <p class="text-slate-500">Bu proje için simülasyon bulunmuyor.</p>
-                        <button id="btn-view-report-2"
-                            class="mt-4 px-6 py-2 bg-primary text-white rounded-full hover:bg-blue-700 transition">Raporu
-                            İncele</button>
                     </div>
                 </div>
-
-                <!-- Loading Indicator -->
-                <div id="detail-loader"
-                    class="absolute inset-0 flex items-center justify-center bg-slate-100 z-20 hidden">
-                    <div class="flex flex-col items-center">
-                        <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <p class="mt-4 text-slate-600 font-medium animate-pulse">Simülasyon Yükleniyor...</p>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <!-- Report View Section -->

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailLoader = document.getElementById('detail-loader');
     const btnViewReport = document.getElementById('btn-view-report');
     const btnViewReport2 = document.getElementById('btn-view-report-2');
+    const searchInput = document.getElementById('project-search'); // Search Input
 
     // Report Elements
     const reportTitleTop = document.getElementById('report-title-top');
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = {
         home: document.getElementById('home'),
         portfolio: document.getElementById('portfolio'),
+        about: document.getElementById('about'),
         detail: document.getElementById('project-detail'),
         report: document.getElementById('project-report')
     };
@@ -79,11 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Override showSection to NOT manage history, history is managed by specific open* functions or links
     // But we need a generic way for 'Home' and 'Portfolio' clicks
 
-    // Initial Load
-    if (window.location.hash === '#portfolio') {
-        showSection('portfolio');
-    } else {
-        showSection('home');
+    // Initial Load Logic is moved to after data fetch to ensure we have projects
+
+    // --- Search Logic ---
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allProjects.filter(p =>
+                p.title.toLowerCase().includes(term) ||
+                p.description.toLowerCase().includes(term)
+            );
+            renderProjects(filtered);
+        });
     }
 
     // --- Data Loading ---
@@ -94,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(projects => {
             allProjects = projects;
             renderProjects(projects);
+            handleInitialRouting();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -118,6 +128,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `).join('');
+    }
+
+    // --- Routing Handler ---
+    function handleInitialRouting() {
+        const hash = window.location.hash;
+
+        if (hash.startsWith('#project-')) {
+            const id = parseInt(hash.replace('#project-', ''));
+            if (!isNaN(id)) {
+                openSimulation(id, false); // Don't push state, just replace if needed
+                // Manually set state for back button consistency
+                history.replaceState({ section: 'detail', id: id }, '', hash);
+                return;
+            }
+        } else if (hash.startsWith('#report-')) {
+            const id = parseInt(hash.replace('#report-', ''));
+            if (!isNaN(id)) {
+                openReport(id, false);
+                history.replaceState({ section: 'report', id: id }, '', hash);
+                return;
+            }
+        } else if (hash === '#portfolio') {
+            showSection('portfolio');
+        } else if (hash === '#about') {
+            document.getElementById('about').scrollIntoView();
+        } else {
+            showSection('home');
+        }
     }
 
     // --- STEP 1: Open Simulation View ---
@@ -240,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showSection('portfolio');
             // Ensure URL is clean if we fell back
             if (window.location.hash.includes('project') || window.location.hash.includes('report')) {
-                history.replaceState(null, '', 'index.html#portfolio');
+                history.pushState(null, '', 'index.html#portfolio'); // Push clean state
             }
         }
     };
