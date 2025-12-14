@@ -201,8 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (project.demo_url && (project.demo_url.startsWith('http://') || project.demo_url.startsWith('https://'))) {
             let finalUrl = project.demo_url;
             // Fix for Streamlit apps: Append ?embed=true to prevent redirect loops in iframes
-            if ((finalUrl.includes('streamlit.app') || finalUrl.includes('share.streamlit.io')) && !finalUrl.includes('embed=true')) {
-                finalUrl += finalUrl.includes('?') ? '&embed=true' : '?embed=true';
+            if ((finalUrl.includes('streamlit.app') || finalUrl.includes('share.streamlit.io'))) {
+                // Ensure embed=true
+                if (!finalUrl.includes('embed=true')) {
+                    finalUrl += finalUrl.includes('?') ? '&embed=true' : '?embed=true';
+                }
+                // Ensure theme=light
+                if (!finalUrl.includes('theme=')) {
+                    finalUrl += '&theme=light';
+                }
             }
 
             // Loader Logic
