@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const simGithub = document.getElementById('sim-github');
     const detailFrame = document.getElementById('detail-frame');
     const detailNoDemo = document.getElementById('detail-no-demo');
+    const detailLoader = document.getElementById('detail-loader');
     const btnViewReport = document.getElementById('btn-view-report');
     const btnViewReport2 = document.getElementById('btn-view-report-2');
 
@@ -148,8 +149,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Frame
         if (project.demo_url && (project.demo_url.startsWith('http://') || project.demo_url.startsWith('https://'))) {
-            detailFrame.src = project.demo_url;
-            detailFrame.classList.remove('hidden');
+            let finalUrl = project.demo_url;
+            // Fix for Streamlit apps: Append ?embed=true to prevent redirect loops in iframes
+            if ((finalUrl.includes('streamlit.app') || finalUrl.includes('share.streamlit.io')) && !finalUrl.includes('embed=true')) {
+                finalUrl += finalUrl.includes('?') ? '&embed=true' : '?embed=true';
+            }
+
+            // Loader Logic
+            if (detailLoader) detailLoader.classList.remove('hidden');
+            detailFrame.classList.add('hidden');
+
+            detailFrame.src = finalUrl;
+
+            detailFrame.onload = () => {
+                if (detailLoader) detailLoader.classList.add('hidden');
+                detailFrame.classList.remove('hidden');
+            };
+
             detailNoDemo.classList.add('hidden');
         } else {
             detailFrame.src = '';
