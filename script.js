@@ -282,16 +282,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Generic Go Back Function for UI Buttons
-    window.goBack = () => {
-        if (history.state && (history.state.section === 'detail' || history.state.section === 'report')) {
-            history.back();
+    // --- Navigation Helper ---
+    window.navigateTo = (section, id = null) => {
+        // Determine URL hash
+        let hash = '#' + section;
+        if (id) hash += '-' + id;
+
+        // Push state
+        history.pushState({ section, id }, '', hash);
+
+        // Show proper view
+        if (section === 'detail' && id) {
+            openSimulation(id, false); // false = don't push state again
+        } else if (section === 'report' && id) {
+            openReport(id, false);
         } else {
-            showSection('portfolio');
-            // Ensure URL is clean if we fell back
-            if (window.location.hash.includes('project') || window.location.hash.includes('report')) {
-                history.pushState(null, '', 'index.html#portfolio'); // Push clean state
-            }
+            showSection(section);
+        }
+    };
+
+    // Generic Go Back Function
+    window.goBack = () => {
+        // If we have history to go back to, use it.
+        // history.length is usually > 1 if we navigated at least once.
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            // Fallback if user landed directly on a page and has no history
+            // We default to 'projects' as a safe 'up' level, or home.
+            navigateTo('portfolio');
         }
     };
 
