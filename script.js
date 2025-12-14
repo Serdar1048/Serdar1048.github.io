@@ -97,13 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Loading ---
     let allProjects = [];
+
+    // Pre-Fetch Routing: Handle static pages immediately to prevent flash
+    handleStaticRouting();
+
     // Cache busting: Add timestamp to force fresh fetch
     fetch('projects.json?t=' + new Date().getTime())
         .then(response => response.json())
         .then(projects => {
             allProjects = projects;
             renderProjects(projects);
-            handleInitialRouting();
+            handleDataDependentRouting();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -130,31 +134,39 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // --- Routing Handler ---
-    function handleInitialRouting() {
+    // --- Routing Handlers ---
+
+    function handleStaticRouting() {
+        const hash = window.location.hash;
+        // If it's a data route, do nothing (wait for data), otherwise show static section
+        if (!hash.startsWith('#project-') && !hash.startsWith('#report-')) {
+            if (hash === '#portfolio') {
+                showSection('portfolio');
+            } else if (hash === '#about') {
+                showSection('about');
+            } else {
+                showSection('home');
+            }
+        }
+    }
+
+    function handleDataDependentRouting() {
         const hash = window.location.hash;
 
         if (hash.startsWith('#project-')) {
             const id = parseInt(hash.replace('#project-', ''));
             if (!isNaN(id)) {
-                openSimulation(id, false); // Don't push state, just replace if needed
-                // Manually set state for back button consistency
+                openSimulation(id, false);
                 history.replaceState({ section: 'detail', id: id }, '', hash);
-                return;
             }
         } else if (hash.startsWith('#report-')) {
             const id = parseInt(hash.replace('#report-', ''));
             if (!isNaN(id)) {
                 openReport(id, false);
                 history.replaceState({ section: 'report', id: id }, '', hash);
-                return;
             }
-        } else if (hash === '#portfolio') {
-            showSection('portfolio');
         } else if (hash === '#about') {
-            document.getElementById('about').scrollIntoView();
-        } else {
-            showSection('home');
+            showSection('about');
         }
     }
 
