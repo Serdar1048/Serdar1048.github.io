@@ -104,6 +104,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Specific Section Logic ---
     // --- Specific Section Logic ---
+
+    // --- Markdown Renderer Setup (Copy Button) ---
+    const renderer = new marked.Renderer();
+    renderer.code = function (code, language) {
+        const validLang = !!(language && hljs.getLanguage(language));
+        const highlighted = validLang ? hljs.highlight(code, { language }).value : code;
+        // Escape for attribute
+        const escapedCode = code.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/"/g, '&quot;');
+
+        return `
+            <div class="relative group my-4 code-wrapper">
+                <button 
+                    onclick="copyCode(this)" 
+                    data-code="${escapedCode}"
+                    class="absolute top-3 right-3 p-2 rounded-lg bg-slate-700/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-primary backdrop-blur-sm z-10"
+                    title="Kodu Kopyala">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+                <pre class="!mt-0 rounded-xl relative"><code class="hljs ${language}">${highlighted}</code></pre>
+            </div>
+        `;
+    };
+    marked.setOptions({ renderer: renderer });
+
+    // Global toggle for copy function
+    window.copyCode = (btn) => {
+        const code = btn.getAttribute('data-code');
+        navigator.clipboard.writeText(code).then(() => {
+            const originalIcon = btn.innerHTML;
+            // Show checkmark
+            btn.innerHTML = `<svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            setTimeout(() => { btn.innerHTML = originalIcon; }, 2000);
+        }).catch(err => console.error('Copy failed', err));
+    };
     window.initGraph = () => {
         const container = document.getElementById('skills-graph');
         if (!container) return;
