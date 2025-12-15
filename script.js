@@ -115,23 +115,83 @@ document.addEventListener('DOMContentLoaded', () => {
             if (grid) grid.innerHTML = '<p class="col-span-3 text-center text-red-500">Hata: Projeler yüklenemedi.</p>';
         });
 
-    function renderProjects(projects) {
+    // --- Filtering & Recommender Logic ---
+    window.filterProjects = (category) => {
+        let filtered = [];
+        let isRecommendation = false;
+
+        if (category === 'all') {
+            filtered = allProjects;
+        } else {
+            isRecommendation = true;
+            const keywords = {
+                vision: ["image", "vision", "detection", "yolo", "cnn", "görüntü", "face", "opencv", "segmentation"],
+                prediction: ["prediction", "regression", "price", "forecast", "finance", "stock", "tahmin", "xgboost", "time series", "analysis", "classification"],
+                nlp: ["nlp", "text", "sentiment", "llm", "language", "bert", "gpt", "doğal", "chat"]
+            };
+
+            const targetKeywords = keywords[category] || [];
+
+            filtered = allProjects.filter(p => {
+                const content = (p.title + " " + p.description + " " + (p.technologies || []).join(" ")).toLowerCase();
+                return targetKeywords.some(k => content.includes(k));
+            });
+
+            // Fake "Match Score" for gamification (94% - 99%)
+            filtered = filtered.map(p => ({
+                ...p,
+                matchScore: Math.floor(Math.random() * (99 - 94 + 1)) + 94
+            })).sort((a, b) => b.matchScore - a.matchScore);
+        }
+
+        renderProjects(filtered, isRecommendation);
+    };
+
+    function renderProjects(projects, isRecommendation = false) {
         if (!grid) return;
-        grid.innerHTML = projects.map(project => `
-            <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 overflow-hidden group cursor-pointer" onclick="openSimulation(${project.id})">
+
+        if (projects.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-3 text-center py-12">
+                    <div class="inline-block p-4 rounded-full bg-slate-100 mb-4">
+                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-slate-900">Bu kategoride henüz proje yok.</h3>
+                    <p class="text-slate-500">Çok yakında eklenecek!</p>
+                    <button onclick="filterProjects('all')" class="mt-4 text-primary hover:underline">Tüm projeleri göster</button>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = projects.map((project, index) => `
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 overflow-hidden group cursor-pointer animate-fade-in-up" 
+                 style="animation-delay: ${index * 100}ms"
+                 onclick="openSimulation(${project.id})">
                 <div class="h-48 overflow-hidden bg-slate-200 relative">
                     <img src="${project.image}" alt="${project.title}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    
+                    ${isRecommendation ? `
+                    <div class="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        %${project.matchScore} Eşleşme
+                    </div>
+                    ` : ''}
                 </div>
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">${project.title}</h3>
                     <p class="text-slate-600 line-clamp-2">${project.description}</p>
                     <div class="mt-3 flex flex-wrap gap-2">
-                        ${project.technologies ? project.technologies.map(tech => `
-                            <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                        ${project.technologies ? project.technologies.slice(0, 3).map(tech => `
+                            <span class="px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-lg border border-slate-200">
                                 ${tech}
                             </span>
                         `).join('') : ''}
+                        ${project.technologies && project.technologies.length > 3 ? `
+                            <span class="px-2 py-1 text-xs font-semibold bg-slate-50 text-slate-400 rounded-lg border border-slate-100">
+                                +${project.technologies.length - 3}
+                            </span>
+                        ` : ''}
                     </div>
                     <div class="mt-4 flex items-center text-sm font-medium text-primary">
                         İncele

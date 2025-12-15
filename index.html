@@ -186,6 +186,60 @@
                     </div>
                 </div>
 
+                <!-- Project Recommender Assistant -->
+                <div class="mb-12 bg-white rounded-2xl shadow-sm border border-slate-100 p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl -mr-16 -mt-16"></div>
+
+                    <div class="relative z-10 text-center">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-4">
+                            <span class="relative flex h-2 w-2">
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            </span>
+                            AI Asistan
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6">Hangi alanda çözüm arıyorsunuz?</h3>
+
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <button onclick="filterProjects('vision')"
+                                class="group flex items-center gap-3 px-6 py-4 bg-slate-50 hover:bg-white border-2 border-slate-100 hover:border-primary/30 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">📷</span>
+                                <div class="text-left">
+                                    <div class="font-bold text-slate-700 group-hover:text-primary">Görüntü İşleme</div>
+                                    <div class="text-xs text-slate-500">YOLO, CNN, Detection</div>
+                                </div>
+                            </button>
+
+                            <button onclick="filterProjects('prediction')"
+                                class="group flex items-center gap-3 px-6 py-4 bg-slate-50 hover:bg-white border-2 border-slate-100 hover:border-primary/30 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">📈</span>
+                                <div class="text-left">
+                                    <div class="font-bold text-slate-700 group-hover:text-primary">Tahminleme & Finans
+                                    </div>
+                                    <div class="text-xs text-slate-500">Regression, XGBoost, Time Series</div>
+                                </div>
+                            </button>
+
+                            <button onclick="filterProjects('nlp')"
+                                class="group flex items-center gap-3 px-6 py-4 bg-slate-50 hover:bg-white border-2 border-slate-100 hover:border-primary/30 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <span class="text-2xl group-hover:scale-110 transition-transform">📝</span>
+                                <div class="text-left">
+                                    <div class="font-bold text-slate-700 group-hover:text-primary">Doğal Dil İşleme
+                                    </div>
+                                    <div class="text-xs text-slate-500">NLP, Sentiment, LLM</div>
+                                </div>
+                            </button>
+
+                            <button onclick="filterProjects('all')"
+                                class="group flex items-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:bg-slate-800">
+                                <span>Tümünü Göster</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Projects Grid -->
                 <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Skeleton Loading State (Shown while fetching) -->
