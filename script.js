@@ -695,6 +695,18 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span>Gönderiliyor...</span> ⏳';
 
+            // JS Validation Check
+            const emailVal = form.querySelector('input[name="email"]').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailVal)) {
+                statusDiv.innerHTML = "Hata: Lütfen geçerli bir email adresi giriniz.";
+                statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-red-50 text-red-600 animate-shake";
+                statusDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+
             try {
                 const response = await fetch(form.action, {
                     method: form.method,
