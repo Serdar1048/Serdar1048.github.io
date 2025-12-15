@@ -350,6 +350,35 @@ document.addEventListener('DOMContentLoaded', () => {
         // Generate TOC
         generateTOC();
 
+        // --- Next Project Logic ---
+        const nextProjectContainer = document.getElementById('next-project-container');
+        if (nextProjectContainer) {
+            const currentIndex = allProjects.findIndex(p => p.id === id);
+            if (currentIndex !== -1) {
+                // Cyclic: (i + 1) % length
+                const nextIndex = (currentIndex + 1) % allProjects.length;
+                const nextProject = allProjects[nextIndex];
+
+                nextProjectContainer.innerHTML = `
+                    <div class="cursor-pointer group" onclick="openSimulation(${nextProject.id})">
+                        <div class="text-sm text-slate-500 mb-1 font-medium">Sıradaki Proje</div>
+                        <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-primary/50 hover:bg-slate-50 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <img src="${nextProject.image}" class="w-16 h-16 object-cover rounded-lg bg-slate-200" alt="${nextProject.title}">
+                                <div>
+                                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-primary transition-colors">${nextProject.title}</h4>
+                                    <p class="text-sm text-slate-500 line-clamp-1">${nextProject.description}</p>
+                                </div>
+                            </div>
+                            <svg class="w-6 h-6 text-slate-400 group-hover:text-primary group-hover:translate-x-2 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         showSection('report');
 
         if (shouldPushState) {
