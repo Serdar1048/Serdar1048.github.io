@@ -425,4 +425,23 @@ document.addEventListener('DOMContentLoaded', () => {
             tocContainer.appendChild(link);
         });
     }
+
+    // --- Reading Progress Bar Logic ---
+    const progressBar = document.getElementById('reading-progress-bar');
+
+    window.addEventListener('scroll', () => {
+        // Only active if report section is visible
+        if (!sections.report || sections.report.classList.contains('hidden')) return;
+
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+        if (scrollHeight <= 0) {
+            progressBar.style.width = '0%';
+            return;
+        }
+
+        const scrollPercentage = (scrollTop / scrollHeight) * 100;
+        progressBar.style.width = `${scrollPercentage}%`;
+    });
 });
