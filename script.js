@@ -110,12 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Check if Vis.js is loaded
         if (typeof vis === 'undefined') {
-            console.log('Vis.js not ready, retrying in 200ms...');
-            setTimeout(window.initGraph, 200);
+            console.warn('Vis.js not ready, retrying...');
+            setTimeout(window.initGraph, 500);
             return;
         }
 
-        // Prevent re-initialization if already present (check if child canvas exists)
+        // Clear loading text if present
+        const loader = document.getElementById('graph-loading');
+        if (loader) loader.style.display = 'none';
+
+        // Check if canvas already exists
         if (container.querySelector('canvas')) return;
 
         const nodes = new vis.DataSet([
