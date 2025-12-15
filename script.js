@@ -696,8 +696,22 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = '<span>Gönderiliyor...</span> ⏳';
 
             // JS Validation Check
+            const nameVal = form.querySelector('input[name="name"]').value.trim();
+            const messageVal = form.querySelector('textarea[name="message"]').value.trim();
             const emailVal = form.querySelector('input[name="email"]').value;
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            // Check Empty Fields
+            if (!nameVal || !messageVal || !emailVal) {
+                statusDiv.innerHTML = "Hata: Lütfen tüm alanları doldurunuz.";
+                statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-red-50 text-red-600 animate-shake";
+                statusDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+
+            // Check Email Regex
             if (!emailRegex.test(emailVal)) {
                 statusDiv.innerHTML = "Hata: Lütfen geçerli bir email adresi giriniz.";
                 statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-red-50 text-red-600 animate-shake";
