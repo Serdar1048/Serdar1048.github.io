@@ -646,4 +646,63 @@ document.addEventListener('DOMContentLoaded', () => {
         const scrollPercentage = (scrollTop / scrollHeight) * 100;
         progressBar.style.width = `${scrollPercentage}%`;
     });
+
+    // --- Contact Form AJAX Logic ---
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = new FormData(form);
+            const submitBtn = document.getElementById('form-submit-btn');
+            const statusDiv = document.getElementById('form-status');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // Loading State
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Gönderiliyor...</span> ⏳';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: data,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Success
+                    statusDiv.innerHTML = "Mesajınız başarıyla gönderildi! 🎉";
+                    statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-green-50 text-green-600 animate-fade-in-up";
+                    statusDiv.classList.remove('hidden');
+                    form.reset(); // Clear inputs
+
+                    // Remove success message after 5 seconds
+                    setTimeout(() => {
+                        statusDiv.classList.add('hidden');
+                        statusDiv.className = "hidden text-center p-3 rounded-lg text-sm font-medium";
+                    }, 5000);
+                } else {
+                    // Error
+                    const errorData = await response.json();
+                    let errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
+                    if (errorData.errors && errorData.errors.length > 0) {
+                        errorMessage = errorData.errors.map(err => err.message).join(", ");
+                    }
+                    statusDiv.innerHTML = "Hata: " + errorMessage;
+                    statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-red-50 text-red-600 animate-shake";
+                    statusDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = "Bağlantı hatası oluştu.";
+                statusDiv.className = "text-center p-3 rounded-lg text-sm font-medium bg-red-50 text-red-600 animate-shake";
+                statusDiv.classList.remove('hidden');
+            } finally {
+                // Restore Button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+    }
 });
