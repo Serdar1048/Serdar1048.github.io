@@ -52,8 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Update Hash to support refresh/bookmarks
+        if (sectionName === 'home') {
+            history.pushState(null, null, ' '); // Clear hash for home
+        } else {
+            window.location.hash = sectionName;
+        }
+
         // Scroll top
         window.scrollTo(0, 0);
+    };
+
+    // Global navigateTo function (referenced in HTML)
+    window.navigateTo = (sectionName) => {
+        showSection(sectionName);
     };
 
     // Handle Browser Back Button
@@ -251,8 +263,26 @@ document.addEventListener('DOMContentLoaded', () => {
     handleStaticRouting();
 
     // Cache busting: Add timestamp to force fresh fetch
-    // Load Project Data
-    fetch(`projects.json?v=${new Date().getTime()}`)
+    // --- Initial Load Logic ---
+    // Handle Refresh/Direct Link (Check Hash)
+    const handleInitialRouting = () => {
+        const hash = window.location.hash.slice(1); // Remove '#'
+        if (hash) {
+            // Check if hash matches a known section
+            if (sections[hash]) {
+                showSection(hash);
+            } else {
+                // Default to home if hash is invalid
+                showSection('home');
+            }
+        } else {
+            // No hash, default to home
+            showSection('home');
+        }
+    };
+
+    // Call initial routing immediately
+    handleInitialRouting();
         .then(response => response.json())
         .then(projects => {
             allProjects = projects;
