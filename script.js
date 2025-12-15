@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Check TLDs
         // Split domain by dot to get parts (e.g. 'sub.example.co.uk' -> ['sub', 'example', 'co', 'uk'])
         // We check if the ending matches any of our allowed TLDs
-        for (const tld of allowedTLDs) {
+        for (const tld of institutionalTLDs) {
             // Check exact TLD match at the end
             if (domain.endsWith('.' + tld)) return true;
         }
