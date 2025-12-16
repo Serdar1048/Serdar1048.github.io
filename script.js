@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         report: document.getElementById('project-report')
     };
 
-    window.showSection = (sectionName) => {
+    window.showSection = (sectionName, updateHash = true) => {
         // Hide all
         Object.values(sections).forEach(sec => {
             if (sec) sec.classList.add('hidden');
@@ -53,10 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update Hash to support refresh/bookmarks
-        if (sectionName === 'home') {
-            history.pushState(null, null, ' '); // Clear hash for home
-        } else {
-            window.location.hash = sectionName;
+        if (updateHash) {
+            if (sectionName === 'home') {
+                history.pushState(null, null, ' '); // Clear hash for home
+            } else {
+                window.location.hash = sectionName;
+            }
         }
 
         // Scroll top
@@ -416,7 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- STEP 1: Open Simulation View ---
     window.openSimulation = (id, shouldPushState = true) => {
         const project = allProjects.find(p => p.id === id);
-        if (!project) return;
+        if (!project) {
+            console.error('Project not found:', id);
+            return;
+        }
 
         currentProjectId = id;
 
@@ -471,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
             detailNoDemo.classList.remove('hidden');
         }
 
-        showSection('detail');
+        showSection('detail', false); // Don't auto-update hash, we handle it below
         // Add to history only if requested (default true)
         if (shouldPushState) {
             history.pushState({ section: 'detail', id: id }, '', '#project-' + id);
@@ -552,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        showSection('report');
+        showSection('report', false); // Don't auto-update hash, we handle it below
 
         if (shouldPushState) {
             history.pushState({ section: 'report', id: id }, '', '#report-' + id);
