@@ -617,39 +617,72 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- TOC Generator ---
+    // --- Mobile TOC Toggle ---
+    window.toggleMobileTOC = () => {
+        const container = document.getElementById('mobile-toc-container');
+        const icon = document.getElementById('mobile-toc-icon');
+        if (container.classList.contains('hidden')) {
+            container.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            container.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    };
+
     function generateTOC() {
-        tocContainer.innerHTML = '';
+        const desktopContainer = document.getElementById('toc-container');
+        const mobileContainer = document.getElementById('mobile-toc-container');
+
+        desktopContainer.innerHTML = '';
+        if (mobileContainer) mobileContainer.innerHTML = '';
+
         const headers = reportContent.querySelectorAll('h1, h2, h3');
 
         if (headers.length === 0) {
-            tocContainer.innerHTML = '<p class="text-xs text-slate-400">Bu raporda başlık bulunamadı.</p>';
+            desktopContainer.innerHTML = '<p class="text-xs text-slate-400">Bu raporda başlık bulunamadı.</p>';
+            if (mobileContainer) mobileContainer.innerHTML = '<p class="text-xs text-slate-400">Başlık bulunamadı.</p>';
             return;
         }
 
-        headers.forEach((header, index) => {
+        const createLink = (header, isMobile) => {
             // Assign ID if missing
             if (!header.id) {
-                header.id = 'heading-' + index;
+                // Use random ID to avoid conflicts if same text
+                header.id = 'heading-' + Math.random().toString(36).substr(2, 9);
             }
 
             const link = document.createElement('a');
             link.href = '#' + header.id;
             link.textContent = header.textContent;
 
-            // Styling based on level
             const level = parseInt(header.tagName.substring(1));
-            link.className = 'block text-sm text-slate-600 hover:text-primary transition-colors py-1 border-l-2 border-transparent hover:border-primary pl-3 truncate';
 
-            if (level === 2) link.classList.add('ml-0', 'font-medium');
-            if (level === 3) link.classList.add('ml-4');
+            if (isMobile) {
+                // Mobile Styling
+                link.className = 'block text-sm text-slate-600 hover:text-primary transition-colors py-2 border-b border-slate-100 last:border-0 pl-2 truncate';
+                if (level === 3) link.classList.add('ml-4', 'text-xs');
+            } else {
+                // Desktop Styling
+                link.className = 'block text-sm text-slate-600 hover:text-primary transition-colors py-1 border-l-2 border-transparent hover:border-primary pl-3 truncate';
+                if (level === 2) link.classList.add('ml-0', 'font-medium');
+                if (level === 3) link.classList.add('ml-4');
+            }
 
-            // Smooth scroll
             link.onclick = (e) => {
                 e.preventDefault();
                 header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // If mobile, close menu after click
+                if (isMobile) window.toggleMobileTOC();
             };
+            return link;
+        };
 
-            tocContainer.appendChild(link);
+        headers.forEach((header) => {
+            // Desktop
+            desktopContainer.appendChild(createLink(header, false));
+            // Mobile
+            if (mobileContainer) mobileContainer.appendChild(createLink(header, true));
         });
     }
 

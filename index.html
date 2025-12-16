@@ -736,6 +736,23 @@
                         </div>
 
                         <!-- Content -->
+                        <!-- Mobile TOC (Collapsible) -->
+                        <div class="lg:hidden mb-8 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <button onclick="toggleMobileTOC()"
+                                class="flex items-center justify-between w-full text-left font-bold text-slate-700">
+                                <span>📋 İçindekiler</span>
+                                <svg id="mobile-toc-icon" class="w-5 h-5 transition-transform" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <nav id="mobile-toc-container"
+                                class="hidden mt-4 space-y-1 border-t border-slate-200 pt-4 max-h-64 overflow-y-auto">
+                                <!-- JS will inject here -->
+                            </nav>
+                        </div>
+
                         <div id="report-content" class="overflow-hidden"></div>
 
                         <!-- Next Project Navigation -->
