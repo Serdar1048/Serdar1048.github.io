@@ -629,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isClosed) {
             // Open
             overlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Lock body scroll
             // Small delay to allow display:block to apply before opacity transition
             setTimeout(() => {
                 overlay.classList.remove('opacity-0');
@@ -638,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Close
             drawer.classList.add('-translate-x-full');
             overlay.classList.add('opacity-0');
+            document.body.classList.remove('overflow-hidden'); // Unlock body scroll
             setTimeout(() => {
                 overlay.classList.add('hidden');
             }, 300); // Match transition duration
