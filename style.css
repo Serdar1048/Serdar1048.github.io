@@ -237,3 +237,59 @@ iframe {
     animation: fadeInUp 0.5s ease-out forwards;
     opacity: 0;
 }
+
+/* --- Responsive Navigation Styles --- */
+
+/* Sticky Header Glassmorphism */
+.sticky-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Active Link Highlight */
+.nav-link.active {
+    color: #3b82f6;
+    /* Tailwind blue-500 */
+    font-weight: 600;
+}
+
+/* Mobile Menu Transition */
+.mobile-menu {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.mobile-menu.open {
+    max-height: 400px;
+    /* Arbitrary large height */
+    opacity: 1;
+}
+
+/* Back to Top Button */
+#back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 40;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+#back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}

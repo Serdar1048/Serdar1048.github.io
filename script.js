@@ -848,4 +848,91 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- Responsive Navigation Logic ---
+
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const menuIconClose = document.getElementById('menu-icon-close');
+
+    window.toggleMobileMenu = () => {
+        if (!mobileMenu) return;
+        const isOpen = mobileMenu.classList.contains('open');
+        if (isOpen) {
+            mobileMenu.classList.remove('open');
+            menuIconOpen.classList.remove('hidden');
+            menuIconClose.classList.add('hidden');
+        } else {
+            mobileMenu.classList.add('open');
+            menuIconOpen.classList.add('hidden');
+            menuIconClose.classList.remove('hidden');
+        }
+    };
+
+    // Close mobile menu when a link is clicked
+    const originalShowSection = window.showSection;
+    window.showSection = (sectionName, updateHash = true) => {
+        originalShowSection(sectionName, updateHash);
+        // Close menu if open
+        if (mobileMenu && mobileMenu.classList.contains('open')) {
+            window.toggleMobileMenu();
+        }
+    };
+
+    // Scroll Handler for Sticky Header & Back to Top
+    const backToTopBtn = document.getElementById('back-to-top');
+    const mainNav = document.getElementById('main-nav');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+
+        // Back to Top Visibility
+        if (backToTopBtn) {
+            if (scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        }
+
+        // Active Link Highlighting (ScrollSpy)
+        // Since we are SPA showing/hiding sections, traditional scrollspy doesn't apply to "sections down the page"
+        // But if 'home' is long, we might want it.
+        // For now, let's rely on click-based active state which is more accurate for this SPA type.
+    });
+
+    // Update active state based on visibility (since we hide sections)
+    // We hook into showSection instead of scroll for this specific SPA type
+    const updateActiveLink = (sectionName) => {
+        navLinks.forEach(link => {
+            // Simple check: does the onclick attribute contain the section name?
+            const onclickVal = link.getAttribute('onclick');
+            if (onclickVal && onclickVal.includes(`'${sectionName}'`)) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    };
+
+    // Hook updateActiveLink into showSection
+    // Note: We already hooked showSection above, so we can just modify that one or chain them.
+    // To avoid double hooking, let's redefine showSection ONCE with all new logic.
+
+    // Resetting showSection to original + new logic combined
+    window.showSection = (sectionName, updateHash = true) => {
+        originalShowSection(sectionName, updateHash);
+
+        // Mobile Menu Logic
+        if (mobileMenu && mobileMenu.classList.contains('open')) {
+            window.toggleMobileMenu();
+        }
+
+        // Active Link Logic
+        updateActiveLink(sectionName);
+    };
+
 });
