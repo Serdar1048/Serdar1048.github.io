@@ -935,4 +935,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActiveLink(sectionName);
     };
 
+    // Initial Active Link Highlight
+    const currentHash = window.location.hash.slice(1) || 'home';
+    if (!currentHash.startsWith('project-') && !currentHash.startsWith('report-')) {
+        updateActiveLink(currentHash);
+    }
+
 });
