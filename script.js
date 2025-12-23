@@ -174,164 +174,211 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(err => console.error('Copy failed', err));
     };
     // --- Binary Snake Game (Skills) ---
-    window.initGraph = () => { // Keeping function name same for compatibility with generic calls
+    // --- Binary Collector Game (Skills) ---
+    window.initGraph = () => {
         const container = document.getElementById('skills-graph');
         if (!container) return;
 
-        // Clear existing content (loaders etc)
         container.innerHTML = '';
-        container.style.cursor = 'none'; // Hide default cursor inside game
+        container.style.cursor = 'none';
 
-        // Create Canvas
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         container.appendChild(canvas);
 
-        // State
+        // Game State
         let width, height;
         let mouseX = 0, mouseY = 0;
-        let snake = []; // {x, y, char}
-        const skills = [
+
+        // Player: '1' (Head) and '0' (Body/Storage)
+        const player = {
+            head: { x: 0, y: 0, char: '1', size: 40 },
+            body: { x: 0, y: 0, char: '0', size: 100 }, // Big '0' container
+            angle: 0
+        };
+
+        const skillsRaw = [
             'Python', 'Data Science', 'Machine Learning', 'Deep Learning',
             'SQL', 'TensorFlow', 'Pandas', 'NumPy', 'Scikit-Learn',
             'Web Dev', 'HTML/CSS', 'Tailwind', 'Git', 'Streamlit'
         ];
-        let targets = []; // {x, y, text, eaten}
-        const snakeSpeed = 0.15; // Easing factor
-        const spacing = 20; // Space between trailing 0s
 
-        // Resize
-        const resize = () => {
+        // Pastel Colors
+        const colors = [
+            '#FCA5A5', '#FDBA74', '#FDE047', '#86EFAC', '#67E8F9',
+            '#93C5FD', '#A5B4FC', '#C4B5FD', '#F0ABFC', '#FDA4AF'
+        ];
+
+        let orbs = []; // The skill balls
+
+        // Initialization
+        const init = () => {
             const rect = container.getBoundingClientRect();
             width = rect.width;
             height = rect.height;
             canvas.width = width;
             canvas.height = height;
-            // Center mouse initially
-            if (snake.length === 0) {
-                mouseX = width / 2;
-                mouseY = height / 2;
-                initSnake();
-                spawnTargets();
-            }
+
+            player.head.x = width / 2;
+            player.head.y = height / 2;
+            player.body.x = width / 2;
+            player.body.y = height / 2;
+
+            spawnOrbs();
         };
 
-        // Init Snake
-        const initSnake = () => {
-            snake = [];
-            // Head
-            snake.push({ x: width / 2, y: height / 2, char: '1' });
-            // Initial Body (some 0s)
-            for (let i = 1; i <= 5; i++) {
-                snake.push({ x: width / 2, y: height / 2 + (i * spacing), char: '0' });
-            }
+        const spawnOrbs = () => {
+            orbs = skillsRaw.map((skill, index) => ({
+                text: skill,
+                x: Math.random() * (width - 100) + 50,
+                y: Math.random() * (height - 100) + 50,
+                r: 15 + Math.random() * 5, // Radius
+                color: colors[index % colors.length],
+                state: 'floating', // floating, collected
+                targetX: 0, // For collected animation
+                targetY: 0,
+                angle: 0, // Position on ring
+                ringRadius: 0,
+                collectionIndex: -1
+            }));
         };
 
-        // Spawn Targets
-        const spawnTargets = () => {
-            targets = [];
-            skills.forEach(skill => {
-                targets.push({
-                    x: Math.random() * (width - 100) + 50,
-                    y: Math.random() * (height - 50) + 25,
-                    text: skill,
-                    eaten: false
-                });
-            });
-        };
-
+        // Input
         // Track Mouse
-        container.addEventListener('mousemove', (e) => {
+        const updateMouse = (x, y) => {
             const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
-        });
-
-        // Touch support
-        container.addEventListener('touchmove', (e) => {
+            mouseX = x - rect.left;
+            mouseY = y - rect.top;
+        };
+        container.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
+        container.addEventListener('touchmove', e => {
             e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.touches[0].clientX - rect.left;
-            mouseY = e.touches[0].clientY - rect.top;
+            updateMouse(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
 
-        // Game Loop
+
+        // Loop
         const loop = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // Styling variables
+            // 1. Move Head ('1') towards mouse (High speed)
+            player.head.x += (mouseX - player.head.x) * 0.15;
+            player.head.y += (mouseY - player.head.y) * 0.15;
+
+            // 2. Move Body ('0') towards Head (Slower, heavier)
+            // It should trail behind
+            const targetBodyX = player.head.x - 60; // Offset slightly
+            const targetBodyY = player.head.y;
+
+            player.body.x += (player.head.x + 30 - player.body.x) * 0.08;
+            player.body.y += (player.head.y - player.body.y) * 0.08;
+
+
+            // 3. Draw Body ('0') - The Container
+            ctx.font = 'bold 120px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#1e293b'; // Slate-800
+            ctx.fillText('0', player.body.x, player.body.y);
 
-            // 1. Move Head towards Mouse
-            const head = snake[0];
-            const dx = mouseX - head.x;
-            const dy = mouseY - head.y;
-            head.x += dx * snakeSpeed;
-            head.y += dy * snakeSpeed;
+            // 4. Update and Draw Orbs
+            const collectedOrbs = orbs.filter(o => o.state === 'collected');
+            let currentCollectedIndex = 0;
 
-            // 2. Move Body (Follow previous segment)
-            for (let i = 1; i < snake.length; i++) {
-                const curr = snake[i];
-                const prev = snake[i - 1];
+            orbs.forEach(orb => {
+                if (orb.state === 'floating') {
+                    // Float logic
+                    orb.x += Math.sin(Date.now() * 0.002 + orb.r) * 0.2;
+                    orb.y += Math.cos(Date.now() * 0.002 + orb.r) * 0.2;
 
-                const bdx = prev.x - curr.x;
-                const bdy = prev.y - curr.y;
-                const dist = Math.sqrt(bdx * bdx + bdy * bdy);
-
-                if (dist > spacing) {
-                    const angle = Math.atan2(bdy, bdx);
-                    curr.x = prev.x - Math.cos(angle) * spacing;
-                    curr.y = prev.y - Math.sin(angle) * spacing;
-                }
-            }
-
-            // 3. Draw Targets
-            ctx.font = 'bold 14px Inter, sans-serif';
-            targets.forEach(target => {
-                if (target.eaten) return;
-
-                // Draw Skill Text
-                ctx.fillStyle = '#64748b'; // Slate-500
-                ctx.fillText(target.text, target.x, target.y);
-
-                // Collision Detection
-                const distToHead = Math.hypot(head.x - target.x, head.y - target.y);
-                if (distToHead < 30) {
-                    target.eaten = true;
-                    // Add new '0' to tail
-                    const last = snake[snake.length - 1];
-                    snake.push({ x: last.x, y: last.y, char: '0' });
-
-                    // Optional: Respawn logic or "You collected X" effect? 
-                    // For now, let's keep them eaten (collected).
-
-                    // Check if all eaten?
-                    if (targets.every(t => t.eaten)) {
-                        setTimeout(spawnTargets, 2000); // Respawn all after 2s
+                    // Collision Check with Head ('1')
+                    // Simple box/point check since '1' is text (center ~ x,y)
+                    const dist = Math.hypot(player.head.x - orb.x, player.head.y - orb.y);
+                    if (dist < 40) {
+                        orb.state = 'collected';
+                        // Assign index for slot calculation
+                        orb.collectionIndex = collectedOrbs.length;
                     }
+
+                    // Draw Floating Orb
+                    drawOrb(orb);
+
+                } else if (orb.state === 'collected') {
+                    // Recalculate collection index based on order
+                    // Actually, we can just keep their initial collection order or re-index
+                    // Let's rely on their persisted collectionIndex if possible, or just re-calc
+                    // Simple: use index in the filtered array
+                    // Update: To avoid jitter, only set index once.  But here we iterate all orbs.
+                    // We'll trust the checked logic above.
+
+                    const slot = getOrbSlot(orb);
+                    const absTargetX = player.body.x + slot.x;
+                    const absTargetY = player.body.y + slot.y;
+
+                    orb.x += (absTargetX - orb.x) * 0.1;
+                    orb.y += (absTargetY - orb.y) * 0.1;
+
+                    drawOrb(orb);
                 }
             });
 
-            // 4. Draw Snake
-            ctx.font = 'bold 24px monospace';
-            snake.forEach((segment, index) => {
-                ctx.fillStyle = index === 0 ? '#3b82f6' : '#94a3b8'; // Blue head, slate tail
-                if (index === 0) ctx.fillStyle = '#2563eb';
-
-                // Shadow for visibility
-                ctx.shadowColor = 'rgba(0,0,0,0.1)';
-                ctx.shadowBlur = 4;
-                ctx.fillText(segment.char, segment.x, segment.y);
-                ctx.shadowBlur = 0;
-            });
+            // 5. Draw Head ('1')
+            ctx.font = 'bold 60px Inter, sans-serif';
+            ctx.fillStyle = '#3b82f6'; // Primary blue
+            ctx.shadowColor = 'rgba(59, 130, 246, 0.5)';
+            ctx.shadowBlur = 20;
+            ctx.fillText('1', player.head.x, player.head.y);
+            ctx.shadowBlur = 0;
 
             requestAnimationFrame(loop);
         };
 
-        // Start
-        window.addEventListener('resize', resize);
-        resize();
+        const getOrbSlot = (orb) => {
+            // Collect around the '0' ring, then inside
+            const idx = orb.collectionIndex;
+            const ring1Cap = 12; // Capacity of outer ring
+
+            if (idx < ring1Cap) {
+                // Outer Ring (Radius 65)
+                const angle = (idx / ring1Cap) * Math.PI * 2 - (Date.now() * 0.0005); // Rotate slowly
+                return {
+                    x: Math.cos(angle) * 70,
+                    y: Math.sin(angle) * 70
+                };
+            } else {
+                // Inner Ring / Spiral (Radius 35)
+                const innerIdx = idx - ring1Cap;
+                const angle = (innerIdx / 6) * Math.PI * 2 + (Date.now() * 0.001);
+                return {
+                    x: Math.cos(angle) * 35,
+                    y: Math.sin(angle) * 35
+                };
+            }
+        };
+
+        const drawOrb = (orb) => {
+            // Ball
+            ctx.beginPath();
+            ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+            ctx.fillStyle = orb.color;
+            ctx.fill();
+
+            // Glow
+            ctx.shadowColor = orb.color;
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Text (Only if floating or very specifically needed)
+            // User asked: "altında hangi yetenek olduğu yazsın"
+            ctx.shadowBlur = 0;
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.fillStyle = '#94a3b8'; // Slate-400
+            ctx.fillText(orb.text, orb.x, orb.y + orb.r + 12);
+        };
+
+        window.addEventListener('resize', init);
+        init();
         loop();
     };
 
