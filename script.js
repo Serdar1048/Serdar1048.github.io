@@ -173,8 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { btn.innerHTML = originalIcon; }, 2000);
         }).catch(err => console.error('Copy failed', err));
     };
-    // --- Binary Snake Game (Skills) ---
-    // --- Binary Collector Game (Skills) ---
+    // --- Binary Collector Game (v5: 3D Arrow) ---
     window.initGraph = () => {
         const container = document.getElementById('skills-graph');
         if (!container) return;
@@ -190,11 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let width, height;
         let mouseX = 0, mouseY = 0;
 
-        // Player
+        // Rigid Player Object
         const player = {
-            head: { x: 0, y: 0, char: '1', size: 40 },
-            body: { x: 0, y: 0, width: 140, height: 80 },
-            angle: 0
+            x: 0,
+            y: 0,
+            angle: 0,
+            speed: 0.12,
+            length: 160, // Total length (approx)
+            headSize: 40,
+            ringRadiusX: 50,
+            ringRadiusY: 50
         };
 
         const skillsRaw = [
@@ -217,10 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.width = width;
             canvas.height = height;
 
-            player.head.x = width / 2 + 100; // Start slightly ahead
-            player.head.y = height / 2;
-            player.body.x = width / 2;
-            player.body.y = height / 2;
+            player.x = width / 2;
+            player.y = height / 2;
 
             spawnOrbs();
         };
@@ -232,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 y: Math.random() * (height - 100) + 50,
                 vx: (Math.random() - 0.5) * 0.2, // Slower drift
                 vy: (Math.random() - 0.5) * 0.2,
-                r: 18 + Math.random() * 4, // Slightly larger
+                r: 16 + Math.random() * 4,
                 color: colors[index % colors.length],
                 state: 'floating',
                 collectionIndex: -1
@@ -251,53 +253,127 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMouse(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
 
-
         // Loop
         const loop = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Head Logic ('1')
-            // Moves towards mouse
-            player.head.x += (mouseX - player.head.x) * 0.1;
-            player.head.y += (mouseY - player.head.y) * 0.1;
+            // 1. Physics: Rigid Movement
+            // Calculate target angle
+            const dx = mouseX - player.x;
+            const dy = mouseY - player.y;
+            const targetAngle = Math.atan2(dy, dx);
 
-            // 2. Body Logic ('0')
-            // Trails behind Head
-            player.body.x += (player.head.x - player.body.x) * 0.06;
-            player.body.y += (player.head.y - player.body.y) * 0.06;
+            // Smooth Rotation (optional, but snappy is better for "no slip")
+            player.angle = targetAngle;
 
-            // 3. Draw Neck (Line connecting Body Center to Head)
+            // Move towards mouse (but stop if close to avoid jitter)
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 5) {
+                player.x += dx * player.speed;
+                player.y += dy * player.speed;
+            }
+
+            // 2. Draw 3D Arrow Wrapper
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle);
+
+            // Draw Graphics (Local Coords: Mouse is at right (0 rads) effectively)
+
+            // --- A. The Shaft ---
+            // Connects Ring (Tail) to Head.
+            // Ring is at x = -80, Head at x = +40
+            const lingGrad = ctx.createLinearGradient(-60, 0, 0, 0);
+            lingGrad.addColorStop(0, '#cbd5e1'); // light slate
+            lingGrad.addColorStop(0.5, '#f8fafc'); // white highlight
+            lingGrad.addColorStop(1, '#94a3b8'); // dark slate
+
             ctx.beginPath();
-            ctx.moveTo(player.body.x, player.body.y);
-            ctx.lineTo(player.head.x, player.head.y);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // 4. Draw Body (Horizontal Ellipse) - The Ring
-            ctx.beginPath();
-            ctx.ellipse(player.body.x, player.body.y, player.body.width / 2, player.body.height / 2, 0, 0, Math.PI * 2);
-            // "sıfırın içi arkaplan renginde olsun etrafı sbeyaz olsun"
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.5)'; // Semi-transparent Slate-900
+            ctx.rect(-80, -8, 100, 16); // Thick shaft
+            ctx.fillStyle = lingGrad;
             ctx.fill();
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#ffffff'; // White Stroke
+            // Shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 5;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+
+            // --- B. The Ring (Tail) ---
+            // Drawn as a Torus at the back (Left side in local space)
+            // Position: x = -80
+
+            ctx.beginPath();
+            ctx.arc(-80, 0, 40, 0, Math.PI * 2);
+            // 3D Ring Effect using Gradient Stroke
+            const ringGrad = ctx.createLinearGradient(-120, -40, -40, 40);
+            ringGrad.addColorStop(0, '#f1f5f9'); // White-ish
+            ringGrad.addColorStop(0.5, '#94a3b8'); // Metallic Grey
+            ringGrad.addColorStop(1, '#475569'); // Darker
+
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = ringGrad;
             ctx.stroke();
 
-            // 5. Update & Draw Orbs
+            // Inner Fill (Dark Hole)
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+            ctx.fill();
+
+
+            // --- C. The Head (Arrow) ---
+            // Position: x = +20 to +60
+            ctx.beginPath();
+            ctx.moveTo(20, -30);
+            ctx.lineTo(80, 0); // Tip
+            ctx.lineTo(20, 30);
+            ctx.lineTo(20, -30);
+
+            const headGrad = ctx.createLinearGradient(20, -30, 20, 30);
+            headGrad.addColorStop(0, '#2563eb'); // Blue Top
+            headGrad.addColorStop(0.5, '#60a5fa'); // Lighter Middle
+            headGrad.addColorStop(1, '#1e40af'); // Dark Blue Bottom
+
+            ctx.fillStyle = headGrad;
+            ctx.fill();
+
+            // Head Glow
+            ctx.shadowColor = 'rgba(59, 130, 246, 0.6)';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // 1 Text on Head
+            ctx.save();
+            // Counter-rotate or align? Let's leave aligned with arrow because it's rigid.
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1', 35, 2);
+            ctx.restore();
+
+            ctx.restore(); // End of Player Transform
+
+
+            // 3. Update & Draw Orbs
+            // Getting the "Tip" world position for fleeing logic
+            // Tip is at local (80, 0).
+            const tipX = player.x + Math.cos(player.angle) * 80;
+            const tipY = player.y + Math.sin(player.angle) * 80;
+
             const collectedOrbs = orbs.filter(o => o.state === 'collected');
 
             orbs.forEach(orb => {
                 if (orb.state === 'floating') {
-                    // Flee Logic
-                    const dx = orb.x - player.head.x;
-                    const dy = orb.y - player.head.y;
+                    // Flee from Tip
+                    const dx = orb.x - tipX;
+                    const dy = orb.y - tipY;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist < 200) {
-                        // "kaçıyor gözüksün ama çok yavaş kaçıyor gözzüksün"
-                        // Slow flee: low force, high damping
-                        const force = (200 - dist) * 0.0003;
+                        const force = (200 - dist) * 0.0005;
                         orb.vx += dx * force;
                         orb.vy += dy * force;
                     }
@@ -313,86 +389,68 @@ document.addEventListener('DOMContentLoaded', () => {
                     orb.x += orb.vx;
                     orb.y += orb.vy;
 
-                    // Eat Check
-                    if (dist < 40) {
+                    // Eat Check (Distance to Tip)
+                    if (dist < 50) {
                         orb.state = 'collected';
                         orb.collectionIndex = collectedOrbs.length;
                     }
                     drawOrb(orb);
 
                 } else if (orb.state === 'collected') {
-                    // Snap to Perimeter
-                    const slot = getOrbSlot(orb);
-                    const absTargetX = player.body.x + slot.x;
-                    const absTargetY = player.body.y + slot.y;
+                    // Calculate Target Position ON THE RING
+                    // The ring is at local x = -80.
+                    // Slots distributed around the ring circle
 
-                    orb.x += (absTargetX - orb.x) * 0.1;
-                    orb.y += (absTargetY - orb.y) * 0.1;
+                    const angleOffset = (orb.collectionIndex * (Math.PI / 4)); // 45 deg separation
+                    // Local coords on ring center (-80,0) with radius 40
+                    const r = 40;
+                    const localX = -80 + r * Math.cos(angleOffset);
+                    const localY = r * Math.sin(angleOffset);
+
+                    // Rotate local to world based on player.angle
+                    // x' = x*cos - y*sin
+                    // y' = x*sin + y*cos
+                    // Then translate by player.x, player.y
+                    const worldTargetX = player.x + (localX * Math.cos(player.angle) - localY * Math.sin(player.angle));
+                    const worldTargetY = player.y + (localX * Math.sin(player.angle) + localY * Math.cos(player.angle));
+
+                    // Lerp to target
+                    orb.x += (worldTargetX - orb.x) * 0.15;
+                    orb.y += (worldTargetY - orb.y) * 0.15;
 
                     drawOrb(orb);
                 }
             });
 
-            // 6. Draw Head ('1')
-            ctx.font = 'bold 60px Inter, sans-serif';
-            ctx.fillStyle = '#3b82f6';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            ctx.shadowColor = 'rgba(59, 130, 246, 0.8)';
-            ctx.shadowBlur = 20;
-            ctx.fillText('1', player.head.x, player.head.y);
-            ctx.shadowBlur = 0;
-
             requestAnimationFrame(loop);
-        };
-
-        const getOrbSlot = (orb) => {
-            // Collect ON the ring
-            const idx = orb.collectionIndex;
-            const perimeterCap = 14;
-
-            // "toplar yendikten sonra tam çevreye girmiş olsun" -> On stroke
-            const radiusX = player.body.width / 2;
-            const radiusY = player.body.height / 2;
-
-            if (idx < perimeterCap) {
-                // Perimeter
-                const angle = (idx / perimeterCap) * Math.PI * 2;
-                return {
-                    x: radiusX * Math.cos(angle),
-                    y: radiusY * Math.sin(angle)
-                };
-            } else {
-                // Inner
-                const innerIdx = idx - perimeterCap;
-                const angle = innerIdx * 0.8;
-                const scale = 0.6;
-                return {
-                    x: radiusX * scale * Math.cos(angle),
-                    y: radiusY * scale * Math.sin(angle)
-                };
-            }
         };
 
         const drawOrb = (orb) => {
             // Ball
             ctx.beginPath();
             ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
-            ctx.fillStyle = orb.color;
+
+            // 3D Ball Effect (Radial Gradient)
+            const g = ctx.createRadialGradient(orb.x - orb.r / 3, orb.y - orb.r / 3, orb.r / 4, orb.x, orb.y, orb.r);
+            g.addColorStop(0, '#fff');
+            g.addColorStop(1, orb.color);
+            ctx.fillStyle = g;
             ctx.fill();
 
-            // Stroke
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
+            // Shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 4;
+            ctx.stroke(); // faint outline
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 0;
 
-            // Text - ALWAYS VISIBLE
-            // "toplar yakalndıktan sonrada hala yeteneklerin adı gözüksün"
+            // Text
             ctx.font = 'bold 11px Inter, sans-serif';
-            ctx.fillStyle = '#e2e8f0'; // Light text (Slate-200) for better visibility on dark
+            ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
-            ctx.shadowColor = 'rgba(0,0,0,0.8)'; // Shadow for contrast
+            // Shadow for text readability
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
             ctx.shadowBlur = 4;
             ctx.fillText(orb.text, orb.x, orb.y + orb.r + 14);
             ctx.shadowBlur = 0;
