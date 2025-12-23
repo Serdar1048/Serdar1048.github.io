@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Player
         const player = {
             head: { x: 0, y: 0, char: '1', size: 40 },
-            body: { x: 0, y: 0, width: 140, height: 80 }, // Horizontal Ellipse dimensions
+            body: { x: 0, y: 0, width: 140, height: 80 },
             angle: 0
         };
 
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.width = width;
             canvas.height = height;
 
-            player.head.x = width / 2;
+            player.head.x = width / 2 + 100; // Start slightly ahead
             player.head.y = height / 2;
             player.body.x = width / 2;
             player.body.y = height / 2;
@@ -230,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: skill,
                 x: Math.random() * (width - 100) + 50,
                 y: Math.random() * (height - 100) + 50,
-                vx: (Math.random() - 0.5) * 0.5, // Initial drift
-                vy: (Math.random() - 0.5) * 0.5,
-                r: 15 + Math.random() * 5,
+                vx: (Math.random() - 0.5) * 0.2, // Slower drift
+                vy: (Math.random() - 0.5) * 0.2,
+                r: 18 + Math.random() * 4, // Slightly larger
                 color: colors[index % colors.length],
                 state: 'floating',
                 collectionIndex: -1
@@ -257,45 +257,54 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.clearRect(0, 0, width, height);
 
             // 1. Head Logic ('1')
-            // Head leads, moves towards mouse
-            player.head.x += (mouseX - player.head.x) * 0.12;
-            player.head.y += (mouseY - player.head.y) * 0.12;
+            // Moves towards mouse
+            player.head.x += (mouseX - player.head.x) * 0.1;
+            player.head.y += (mouseY - player.head.y) * 0.1;
 
-            // 2. Body Logic ('0' Ellipse)
-            // Follows Head
-            // But '0' is slower/heavier
-            player.body.x += (player.head.x - player.body.x) * 0.08;
-            player.body.y += (player.head.y - player.body.y) * 0.08;
+            // 2. Body Logic ('0')
+            // Trails behind Head
+            player.body.x += (player.head.x - player.body.x) * 0.06;
+            player.body.y += (player.head.y - player.body.y) * 0.06;
 
-            // 3. Draw Body (Horizontal '0' Ellipse)
+            // 3. Draw Neck (Line connecting Body Center to Head)
             ctx.beginPath();
-            ctx.ellipse(player.body.x, player.body.y, player.body.width / 2, player.body.height / 2, 0, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff'; // White Fill
-            ctx.fill();
-            ctx.lineWidth = 6; // Thicker definition
-            ctx.strokeStyle = '#0f172a'; // Black Stroke
+            ctx.moveTo(player.body.x, player.body.y);
+            ctx.lineTo(player.head.x, player.head.y);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            // 4. Update & Draw Orbs
+            // 4. Draw Body (Horizontal Ellipse) - The Ring
+            ctx.beginPath();
+            ctx.ellipse(player.body.x, player.body.y, player.body.width / 2, player.body.height / 2, 0, 0, Math.PI * 2);
+            // "sıfırın içi arkaplan renginde olsun etrafı sbeyaz olsun"
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.5)'; // Semi-transparent Slate-900
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#ffffff'; // White Stroke
+            ctx.stroke();
+
+            // 5. Update & Draw Orbs
             const collectedOrbs = orbs.filter(o => o.state === 'collected');
 
             orbs.forEach(orb => {
                 if (orb.state === 'floating') {
-                    // Flee Logic (Stronger now)
+                    // Flee Logic
                     const dx = orb.x - player.head.x;
                     const dy = orb.y - player.head.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < 250) { // Larger detection range
-                        // Stronger flee velocity
-                        const force = (250 - dist) * 0.001;
+                    if (dist < 200) {
+                        // "kaçıyor gözüksün ama çok yavaş kaçıyor gözzüksün"
+                        // Slow flee: low force, high damping
+                        const force = (200 - dist) * 0.0003;
                         orb.vx += dx * force;
                         orb.vy += dy * force;
                     }
 
                     // Friction
-                    orb.vx *= 0.92;
-                    orb.vy *= 0.92;
+                    orb.vx *= 0.96;
+                    orb.vy *= 0.96;
 
                     // Boundaries
                     if (orb.x < 30 || orb.x > width - 30) orb.vx *= -1;
@@ -324,17 +333,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 5. Draw Head ('1')
-            // "1" sanki yılanın başıymış gibi... ortasından uzasın
+            // 6. Draw Head ('1')
             ctx.font = 'bold 60px Inter, sans-serif';
             ctx.fillStyle = '#3b82f6';
-            ctx.textAlign = 'center'; // Center horizontally on coordinate
-            ctx.textBaseline = 'middle'; // Center vertically
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
 
-            // To make it look like it's coming out, the head is the '1' itself.
-            // We draw it at head position.
-            ctx.shadowColor = 'rgba(59, 130, 246, 0.4)';
-            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(59, 130, 246, 0.8)';
+            ctx.shadowBlur = 20;
             ctx.fillText('1', player.head.x, player.head.y);
             ctx.shadowBlur = 0;
 
@@ -342,51 +348,54 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const getOrbSlot = (orb) => {
-            // Position on Ellipse Perimeter
-            // Ellipse parametric eq: x = a cos t, y = b sin t
-            // a = width/2, b = height/2
-
+            // Collect ON the ring
             const idx = orb.collectionIndex;
-            const perimeterCap = 16;
+            const perimeterCap = 14;
+
+            // "toplar yendikten sonra tam çevreye girmiş olsun" -> On stroke
+            const radiusX = player.body.width / 2;
+            const radiusY = player.body.height / 2;
 
             if (idx < perimeterCap) {
                 // Perimeter
-                // Evenly distribute
                 const angle = (idx / perimeterCap) * Math.PI * 2;
                 return {
-                    x: (player.body.width / 2 + orb.r) * Math.cos(angle), // +orb.r to sit ON line
-                    y: (player.body.height / 2 + orb.r) * Math.sin(angle)
+                    x: radiusX * Math.cos(angle),
+                    y: radiusY * Math.sin(angle)
                 };
             } else {
-                // Inside (Spiral)
+                // Inner
                 const innerIdx = idx - perimeterCap;
                 const angle = innerIdx * 0.8;
-                const radiusScale = 1 - (innerIdx * 0.05);
+                const scale = 0.6;
                 return {
-                    x: (player.body.width / 4) * radiusScale * Math.cos(angle),
-                    y: (player.body.height / 4) * radiusScale * Math.sin(angle)
+                    x: radiusX * scale * Math.cos(angle),
+                    y: radiusY * scale * Math.sin(angle)
                 };
             }
         };
 
         const drawOrb = (orb) => {
+            // Ball
             ctx.beginPath();
             ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
             ctx.fillStyle = orb.color;
             ctx.fill();
 
-            // Simple stroke for definition
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = '#fff';
+            // Stroke
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
             ctx.stroke();
 
-            // Text
-            if (orb.state === 'floating') {
-                ctx.font = 'bold 11px Inter, sans-serif';
-                ctx.fillStyle = '#94a3b8';
-                ctx.textAlign = 'center';
-                ctx.fillText(orb.text, orb.x, orb.y + orb.r + 14);
-            }
+            // Text - ALWAYS VISIBLE
+            // "toplar yakalndıktan sonrada hala yeteneklerin adı gözüksün"
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillStyle = '#e2e8f0'; // Light text (Slate-200) for better visibility on dark
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)'; // Shadow for contrast
+            ctx.shadowBlur = 4;
+            ctx.fillText(orb.text, orb.x, orb.y + orb.r + 14);
+            ctx.shadowBlur = 0;
         };
 
         window.addEventListener('resize', init);
