@@ -179,13 +179,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         container.innerHTML = '';
+        // Cursor visible now (removed cursor:none)
+        container.style.cursor = 'default';
+
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         container.appendChild(canvas);
 
         let width, height;
         let particles = [];
-        let mouse = { x: -1000, y: -1000 };
+        // Mouse removed from physics
 
         const skills = [
             'Python', 'Data Science', 'Machine Learning', 'Deep Learning',
@@ -203,50 +206,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.vy = (Math.random() - 0.5) * 0.4;
                 this.size = 3 + Math.random() * 2;
                 this.color = '#3b82f6'; // Blue-500
+
+                // Measure text width for bouncing logic
+                ctx.font = 'bold 14px Inter, sans-serif';
+                this.textWidth = ctx.measureText(text).width;
             }
 
             update() {
-                // Bounds Check & Bounce
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
+                // Bounds Check & Bounce (Considering Text Width)
+                // Keep text completely inside
+                const padding = 20;
 
-                // Mouse Interaction REMOVED as per user request (Ambient Floating only)
+                if (this.x - this.textWidth / 2 < padding) {
+                    this.x = padding + this.textWidth / 2;
+                    this.vx *= -1;
+                }
+                if (this.x + this.textWidth / 2 > width - padding) {
+                    this.x = width - padding - this.textWidth / 2;
+                    this.vx *= -1;
+                }
 
-                // Friction to return to normal speed (slower stabilization)
-                // this.vx *= 0.99; // Not needed if we don't apply external forces
-                // this.vy *= 0.99;
+                if (this.y < padding) {
+                    this.y = padding;
+                    this.vy *= -1;
+                }
+                if (this.y > height - padding) {
+                    this.y = height - padding;
+                    this.vy *= -1;
+                }
 
-                // Keep it moving constantly but slowly
-                // Random drift to make it "organic"
-                // this.vx += (Math.random() - 0.5) * 0.02; // very subtle changes
-                // this.vy += (Math.random() - 0.5) * 0.02;
-
-                // Just constant floating with bounce is often smoothest for this effect
-                // or very very slight noise? Let's stick to simple bounce + init speed implies drift.
-                // We'll re-init speeds to be lower in constructor if needed, but here we just apply velocity.
-
+                // Ambient Floating only
                 this.x += this.vx;
                 this.y += this.vy;
             }
 
             draw() {
+                // Particle (Node)
                 // Glow Effect
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.2)'; // Blue glow
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
                 ctx.fill();
 
                 // Core
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = '#60a5fa'; // Lighter blue core
+                ctx.fillStyle = '#60a5fa';
                 ctx.fill();
 
-                // Text
-                ctx.font = '12px Inter, sans-serif';
-                ctx.fillStyle = '#e2e8f0'; // Slate-200
+                // Text (High Legibility)
+                ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.fillStyle = '#ffffff'; // Pure White
                 ctx.textAlign = 'center';
-                ctx.fillText(this.text, this.x, this.y + this.size + 15);
+
+                // Text Shadow (Outlining for contrast against lines)
+                ctx.shadowColor = 'rgba(15, 23, 42, 0.8)'; // Dark shadow (background color)
+                ctx.shadowBlur = 4;
+                ctx.strokeText(this.text, this.x, this.y + this.size + 18); // Stroke for outline effect? Or just shadow.
+                // Reset shadow for fill
+                ctx.shadowBlur = 0;
+
+                // Simple background box for text? No, user wants "clean". 
+                // Let's use strong drop shadow + bold white.
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 6;
+                ctx.fillText(this.text, this.x, this.y + this.size + 18);
+                ctx.shadowBlur = 0;
             }
         }
 
@@ -261,27 +286,34 @@ document.addEventListener('DOMContentLoaded', () => {
             skills.forEach(skill => {
                 particles.push(new Particle(skill));
             });
-            // Add some extra dummy nodes for density if needed
-            for (let i = 0; i < 10; i++) {
-                particles.push(new Particle(""));
-            }
+            // NO DUMMY NODES
         };
 
         const animate = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // Draw Connections First
+            // Draw Connections: FULL CONNECTIVITY
+            // Draw lines between ALL pairs
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    const connectionDist = 150;
 
-                    if (dist < connectionDist) {
+                    // We draw ALL lines, but opacity depends on distance to avoid whiteout
+                    // Max diagonal distance is approx sqrt(w^2 + h^2)
+                    // Let's fade them out very gradually.
+
+                    const maxDist = Math.max(width, height) * 0.8; // Visible across most screen
+
+                    if (dist < maxDist) {
                         ctx.beginPath();
-                        const opacity = 1 - (dist / connectionDist);
-                        ctx.strokeStyle = `rgba(148, 163, 184, ${opacity * 0.5})`; // Slate-400 lines
+                        // Opacity function: Stronger when close, faint when far
+                        // Start: 0.2, End: 0.0
+                        let opacity = (1 - (dist / maxDist)) * 0.15;
+                        if (opacity < 0.01) opacity = 0.01; // Minimum faint line
+
+                        ctx.strokeStyle = `rgba(148, 163, 184, ${opacity})`; // Slate-400
                         ctx.lineWidth = 1;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
@@ -298,19 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             requestAnimationFrame(animate);
         };
-
-        // Event Listeners
-        const updateMouse = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
-        };
-
-        container.addEventListener('mousemove', updateMouse);
-        container.addEventListener('mouseleave', () => {
-            mouse.x = -1000;
-            mouse.y = -1000;
-        });
 
         window.addEventListener('resize', init);
 
