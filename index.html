@@ -180,30 +180,47 @@
                 </div>
             </div>
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                <div class="text-center max-w-3xl mx-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[80vh] flex flex-col justify-center">
+                <div class="max-w-4xl mx-auto text-center space-y-8">
+
+                    <!-- Intro Tag -->
+                    <div class="inline-block animate-fade-in-up">
+                        <span
+                            class="px-4 py-1.5 rounded-full border border-slate-200 bg-white/50 backdrop-blur-sm text-slate-500 text-sm font-medium tracking-wide">
+                            Yazılım Mühendisliği Öğrencisi
+                        </span>
+                    </div>
+
                     <!-- Minimal Headline -->
-                    <h1 class="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
-                        Veri Bilimi ve <br>
-                        <span class="text-slate-700">Yapay Zeka Çözümleri</span>
+                    <h1 class="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-tight animate-fade-in-up"
+                        style="animation-delay: 100ms;">
+                        Veri. <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Zeka.</span>
+                        Çözüm.
                     </h1>
+
                     <!-- Simplified Description -->
-                    <p class="text-lg text-slate-600 mb-10 leading-relaxed mx-auto font-light">
-                        Makine öğrenimi ve modern web teknolojilerini kullanarak,
-                        veriye dayalı ve ölçeklenebilir projeler geliştiriyorum.
+                    <p class="text-xl md:text-2xl text-slate-500 font-light max-w-2xl mx-auto leading-relaxed animate-fade-in-up"
+                        style="animation-delay: 200ms;">
+                        Karmaşık verileri modern algoritmalarla işleyerek, <br class="hidden md:block" />
+                        anlamlı ve ölçeklenebilir projelere dönüştürüyorum.
                     </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <a href="#portfolio" onclick="navigateTo('portfolio')"
-                            class="px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2">
-                            Projelerimi Keşfet
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                    <!-- Minimal Actions -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-5 pt-4 animate-fade-in-up"
+                        style="animation-delay: 300ms;">
+                        <button onclick="navigateTo('portfolio')"
+                            class="group px-8 py-4 bg-slate-900 text-white rounded-full font-medium transition-all duration-300 hover:bg-black hover:ring-4 hover:ring-slate-200 flex items-center justify-center gap-3">
+                            Projelerimi Gör
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                             </svg>
-                        </a>
-                        <button onclick="navigateTo('about')"
-                            class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
-                            Hakkımda
+                        </button>
+                        <button onclick="navigateTo('contact')"
+                            class="group px-8 py-4 bg-transparent text-slate-600 border border-slate-200 rounded-full font-medium hover:text-slate-900 hover:border-slate-400 transition-all duration-300 flex items-center justify-center">
+                            İletişim
                         </button>
                     </div>
                 </div>
@@ -800,7 +817,7 @@
             </svg>
         </button>
 
-        <script src="script.js?v=22"></script>
+        <script src="script.js?v=23"></script>
 </body>
 
 </html>
