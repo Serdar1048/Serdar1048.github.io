@@ -272,8 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.ellipse(player.body.x, player.body.y, player.body.width / 2, player.body.height / 2, 0, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff'; // White Fill
             ctx.fill();
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#0f172a'; // Black Stroke (Slate-900)
+            ctx.lineWidth = 6; // Thicker definition
+            ctx.strokeStyle = '#0f172a'; // Black Stroke
             ctx.stroke();
 
             // 4. Update & Draw Orbs
@@ -281,25 +281,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             orbs.forEach(orb => {
                 if (orb.state === 'floating') {
-                    // Flee Logic
+                    // Flee Logic (Stronger now)
                     const dx = orb.x - player.head.x;
                     const dy = orb.y - player.head.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < 200) { // Detection range
-                        // Flee velocity
-                        const force = (200 - dist) * 0.0005; // Gentle push
+                    if (dist < 250) { // Larger detection range
+                        // Stronger flee velocity
+                        const force = (250 - dist) * 0.001;
                         orb.vx += dx * force;
                         orb.vy += dy * force;
                     }
 
                     // Friction
-                    orb.vx *= 0.95;
-                    orb.vy *= 0.95;
+                    orb.vx *= 0.92;
+                    orb.vy *= 0.92;
 
                     // Boundaries
-                    if (orb.x < 20 || orb.x > width - 20) orb.vx *= -1;
-                    if (orb.y < 20 || orb.y > height - 20) orb.vy *= -1;
+                    if (orb.x < 30 || orb.x > width - 30) orb.vx *= -1;
+                    if (orb.y < 30 || orb.y > height - 30) orb.vy *= -1;
 
                     orb.x += orb.vx;
                     orb.y += orb.vy;
