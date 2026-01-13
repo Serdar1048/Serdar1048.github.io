@@ -162,6 +162,7 @@ async function fetchProjects() {
         const response = await fetch('projects.json?t=' + new Date().getTime());
         projectsData = await response.json();
         renderAdminList();
+        handleRouting(); // Initial routing check after data load
     } catch (error) {
         console.error('Yükleme hatası:', error);
         alert('Projeler yüklenemedi. Yerel sunucuyu kontrol edin.');
@@ -190,11 +191,21 @@ function renderAdminList() {
 
 // Navigation
 function showProjectList() {
+    window.location.hash = '#list';
+    renderViewList();
+}
+
+function renderViewList() {
     document.getElementById('view-list').classList.remove('hidden');
     document.getElementById('view-form').classList.add('hidden');
 }
 
 function showEditForm() {
+    window.location.hash = '#new';
+    renderEditForm();
+}
+
+function renderEditForm() {
     document.getElementById('view-list').classList.add('hidden');
     document.getElementById('view-form').classList.remove('hidden');
 
@@ -217,7 +228,10 @@ window.editProject = (id) => {
     const project = projectsData.find(p => p.id === id);
     if (!project) return;
 
-    showEditForm();
+    window.location.hash = '#edit?id=' + id;
+    renderEditForm(); // We need to render form first, then populate it.
+    // Actually, populating logic was here. Let's keep it but separate purely visual switch.
+
     document.getElementById('form-title').textContent = "Proje Düzenle";
     document.getElementById('edit-id').value = project.id;
     document.getElementById('edit-title').value = project.title;
@@ -225,7 +239,6 @@ window.editProject = (id) => {
     document.getElementById('edit-image').value = project.image;
     document.getElementById('edit-github').value = project.github;
     document.getElementById('edit-demo').value = project.demo_url;
-    document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
     document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
     document.getElementById('edit-details').value = project.details;
     document.getElementById('edit-details-en').value = project.details_en || ""; // Populate English details
@@ -249,7 +262,6 @@ window.saveProject = () => {
         github: document.getElementById('edit-github').value,
         demo_url: document.getElementById('edit-demo').value,
         technologies: document.getElementById('edit-technologies').value.split(',').map(t => t.trim()).filter(t => t),
-        technologies: document.getElementById('edit-technologies').value.split(',').map(t => t.trim()).filter(t => t),
         details: document.getElementById('edit-details').value,
         details_en: document.getElementById('edit-details-en').value // Save English details
     };
@@ -264,6 +276,7 @@ window.saveProject = () => {
     }
 
     pushToGithub();
+    window.location.hash = '#list';
 };
 
 // GitHub API Push
@@ -307,7 +320,7 @@ async function pushToGithub() {
         if (putRes.ok) {
             alert('Başarıyla GitHub\'a kaydedildi! Değişikliklerin siteye yansıması 1-2 dakika sürebilir.');
             renderAdminList();
-            showProjectList();
+            showProjectList(); // This now sets hash to #list
         } else {
             const err = await putRes.json();
             throw new Error(err.message);
@@ -332,7 +345,7 @@ async function pushToGithub() {
 
         alert(msg);
         renderAdminList(); // Update UI locally anyway
-        showProjectList();
+        showProjectList(); // This now sets hash to #list
     }
 }
 
@@ -446,3 +459,50 @@ function insertImage(input, targetId = 'edit-details') {
     };
     reader.readAsDataURL(file);
 }
+
+// --- NEW routing Logic ---
+function handleRouting() {
+    const hash = window.location.hash;
+
+    if (hash === '#new') {
+        renderEditForm();
+        // Clear form
+        document.getElementById('form-title').textContent = "Yeni Proje Ekle";
+        document.getElementById('edit-id').value = "";
+        document.getElementById('edit-title').value = "";
+        document.getElementById('edit-desc').value = "";
+        document.getElementById('edit-image').value = "";
+        document.getElementById('edit-github').value = "";
+        document.getElementById('edit-demo').value = "";
+        document.getElementById('edit-technologies').value = "";
+        document.getElementById('edit-details').value = "";
+        document.getElementById('edit-details-en').value = "";
+    } else if (hash.startsWith('#edit?id=')) {
+        const id = parseInt(hash.split('=')[1]);
+        const project = projectsData.find(p => p.id === id);
+
+        if (project) {
+            renderEditForm();
+            document.getElementById('form-title').textContent = "Proje Düzenle";
+            document.getElementById('edit-id').value = project.id;
+            document.getElementById('edit-title').value = project.title;
+            document.getElementById('edit-desc').value = project.description;
+            document.getElementById('edit-image').value = project.image;
+            document.getElementById('edit-github').value = project.github;
+            document.getElementById('edit-demo').value = project.demo_url;
+            document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
+            document.getElementById('edit-details').value = project.details;
+            document.getElementById('edit-details-en').value = project.details_en || "";
+        } else {
+            // ID not found, go back to list
+            window.location.hash = '#list';
+            renderViewList();
+        }
+    } else {
+        // Default to list
+        if (hash !== '#list') window.location.hash = '#list';
+        renderViewList();
+    }
+}
+
+window.addEventListener('hashchange', handleRouting);
