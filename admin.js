@@ -446,6 +446,28 @@ function insertImage(input, targetId = 'edit-details') {
     reader.readAsDataURL(file);
 }
 
+// Handle Image Input Filling (Base64)
+function fillImageInput(input, targetId) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Check size (Max 500KB recommended for Performance)
+    if (file.size > 500 * 1024) {
+        if (!confirm("Bu resim biraz büyük (>500KB). Sitenizin açılış hızını etkileyebilir. Yine de kullanılsın mı?")) {
+            input.value = ''; // Reset
+            return;
+        }
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const base64 = e.target.result;
+        const inputField = document.getElementById(targetId);
+        inputField.value = base64;
+    };
+    reader.readAsDataURL(file);
+}
+
 // --- NEW routing Logic ---
 function handleRouting() {
     const hash = window.location.hash;
