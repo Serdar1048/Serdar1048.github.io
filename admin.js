@@ -207,7 +207,9 @@ function showEditForm() {
     document.getElementById('edit-github').value = "";
     document.getElementById('edit-demo').value = "";
     document.getElementById('edit-technologies').value = "";
+    document.getElementById('edit-technologies').value = "";
     document.getElementById('edit-details').value = "";
+    document.getElementById('edit-details-en').value = ""; // Clear English details
 }
 
 // Edit Action
@@ -224,7 +226,9 @@ window.editProject = (id) => {
     document.getElementById('edit-github').value = project.github;
     document.getElementById('edit-demo').value = project.demo_url;
     document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
+    document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
     document.getElementById('edit-details').value = project.details;
+    document.getElementById('edit-details-en').value = project.details_en || ""; // Populate English details
 };
 
 // Delete Action
@@ -245,7 +249,9 @@ window.saveProject = () => {
         github: document.getElementById('edit-github').value,
         demo_url: document.getElementById('edit-demo').value,
         technologies: document.getElementById('edit-technologies').value.split(',').map(t => t.trim()).filter(t => t),
-        details: document.getElementById('edit-details').value
+        technologies: document.getElementById('edit-technologies').value.split(',').map(t => t.trim()).filter(t => t),
+        details: document.getElementById('edit-details').value,
+        details_en: document.getElementById('edit-details-en').value // Save English details
     };
 
     if (id) {
@@ -331,7 +337,7 @@ async function pushToGithub() {
 }
 
 // Handle Folder/File Upload (MD + Images Auto Link)
-async function handleFolderUpload(input) {
+async function handleFolderUpload(input, targetId = 'edit-details') {
     const files = Array.from(input.files);
     if (files.length === 0) return;
 
@@ -402,7 +408,7 @@ async function handleFolderUpload(input) {
             alert(`${replacements.length} adet resim başarıyla MD dosyasına gömüldü!`);
         }
 
-        document.getElementById('edit-details').value = mdContent;
+        document.getElementById(targetId).value = mdContent;
     };
     reader.readAsText(mdFile);
 }
@@ -418,7 +424,7 @@ function readFileAsBase64(file) {
 }
 
 // Handle Image Insertion (Base64)
-function insertImage(input) {
+function insertImage(input, targetId = 'edit-details') {
     const file = input.files[0];
     if (!file) return;
 
@@ -430,7 +436,7 @@ function insertImage(input) {
     const reader = new FileReader();
     reader.onload = function (e) {
         const base64 = e.target.result;
-        const textarea = document.getElementById('edit-details');
+        const textarea = document.getElementById(targetId);
         const cursor = textarea.selectionStart;
         const text = textarea.value;
         const markdownImage = `\n![${file.name}](${base64})\n`;

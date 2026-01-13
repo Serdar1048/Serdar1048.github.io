@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Global Project Data State
     let currentProjectId = null;
+    let currentReportLang = 'tr'; // 'tr' or 'en'
 
     // --- SPA Logic (Single Page Application) ---
     const sections = {
@@ -620,6 +621,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const project = allProjects.find(p => p.id === id);
         if (!project) return;
 
+        // Reset Language to TR by default
+        currentReportLang = 'tr';
+
+        // Setup Toggle Button
+        const btnLangToggle = document.getElementById('btn-lang-toggle');
+        if (project.details_en && project.details_en.trim() !== "") {
+            btnLangToggle.classList.remove('hidden');
+            btnLangToggle.innerHTML = '<span class="text-xs">🇺🇸</span> English';
+        } else {
+            btnLangToggle.classList.add('hidden');
+        }
+
         // Setup Back Button for Report View
         // If we came here via pushState, Back should pop. 
         // If we want a dedicated button to go back to simulation:
@@ -652,9 +665,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add GitHub Markdown Style Class
         reportContent.classList.add('markdown-body');
 
-        // Render Markdown
-        const htmlContent = marked.parse(project.details, { breaks: true });
-        reportContent.innerHTML = htmlContent;
+        // Render Markdown based on Language
+        renderReportContent(project);
 
         // Generate TOC
         generateTOC();
@@ -693,6 +705,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shouldPushState) {
             history.pushState({ section: 'report', id: id }, '', '#report-' + id);
         }
+    };
+
+    // --- Helper: Render Report Content ---
+    function renderReportContent(project) {
+        const reportContent = document.getElementById('report-content');
+        const content = currentReportLang === 'en' ? project.details_en : project.details;
+
+        // Fallback if EN selected but empty (shouldn't happen with button logic but safe to check)
+        const finalContent = content || project.details;
+
+        const htmlContent = marked.parse(finalContent, { breaks: true });
+        reportContent.innerHTML = htmlContent;
+
+        // Update Title if needed (Optional: add title_en to JSON later if wanted)
+        // document.getElementById('report-title').textContent = project.title; 
+    }
+
+    // --- Toggle Language Action ---
+    window.toggleReportLanguage = () => {
+        const project = allProjects.find(p => p.id === currentProjectId); // Use implicit currentID from openReport scope if possible, or store it
+        // Actually openReport doesn't store currentProjectId globally for report view specifically, but it does for Sim. 
+        // Let's use the ID from the URL hash or rely on the fact that openReport was called.
+        // Better: store currentReportId
+
+        // Let's find project again from URL hash to be safe/stateless-ish
+        const hash = window.location.hash;
+        if (!hash.startsWith('#report-')) return;
+        const id = parseInt(hash.replace('#report-', ''));
+        const p = allProjects.find(pr => pr.id === id);
+
+        if (!p) return;
+
+        if (currentReportLang === 'tr') {
+            currentReportLang = 'en';
+            document.getElementById('btn-lang-toggle').innerHTML = '<span class="text-xs">🇹🇷</span> Türkçe';
+        } else {
+            currentReportLang = 'tr';
+            document.getElementById('btn-lang-toggle').innerHTML = '<span class="text-xs">🇺🇸</span> English';
+        }
+
+        renderReportContent(p);
+        generateTOC();
     };
 
     // --- Navigation Helper ---

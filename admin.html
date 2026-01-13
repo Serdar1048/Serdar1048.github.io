@@ -134,19 +134,44 @@
                                 <label
                                     class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
                                     <span>🖼️ Resim Ekle</span>
-                                    <input type="file" accept="image/*" class="hidden" onchange="insertImage(this)">
+                                    <input type="file" accept="image/*" class="hidden"
+                                        onchange="insertImage(this, 'edit-details')">
                                 </label>
                                 <label
                                     class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
                                     <span>📁 Klasör Yükle (MD+Resim)</span>
                                     <input type="file" id="folder-upload" webkitdirectory directory multiple
-                                        class="hidden" onchange="handleFolderUpload(this)">
+                                        class="hidden" onchange="handleFolderUpload(this, 'edit-details')">
                                 </label>
                             </div>
                         </div>
                         <textarea id="edit-details" rows="12"
                             class="w-full px-3 py-2 border rounded-lg font-mono text-sm"
-                            placeholder="# Proje Başlığı\n\nDetaylar..."></textarea>
+                            placeholder="# Proje Başlığı (Türkçe)\n\nDetaylar..."></textarea>
+                    </div>
+
+                    <!-- English Report Section -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-700">English Details (Markdown)</label>
+                            <div class="flex gap-2">
+                                <label
+                                    class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
+                                    <span>🖼️ Resim Ekle</span>
+                                    <input type="file" accept="image/*" class="hidden"
+                                        onchange="insertImage(this, 'edit-details-en')">
+                                </label>
+                                <label
+                                    class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded border border-slate-300 transition-colors">
+                                    <span>📁 Klasör Yükle (MD+Resim)</span>
+                                    <input type="file" id="folder-upload-en" webkitdirectory directory multiple
+                                        class="hidden" onchange="handleFolderUpload(this, 'edit-details-en')">
+                                </label>
+                            </div>
+                        </div>
+                        <textarea id="edit-details-en" rows="12"
+                            class="w-full px-3 py-2 border rounded-lg font-mono text-sm"
+                            placeholder="# Project Title (English)\n\nDetails..."></textarea>
                     </div>
                     <div class="flex gap-4">
                         <button onclick="saveProject()"
