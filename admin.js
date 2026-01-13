@@ -446,26 +446,71 @@ function insertImage(input, targetId = 'edit-details') {
     reader.readAsDataURL(file);
 }
 
-// Handle Image Input Filling (Base64)
-function fillImageInput(input, targetId) {
+// Handle Image Upload (GitHub API)
+async function uploadImageToGithub(input, targetId) {
     const file = input.files[0];
     if (!file) return;
 
-    // Check size (Max 500KB recommended for Performance)
-    if (file.size > 500 * 1024) {
-        if (!confirm("Bu resim biraz büyük (>500KB). Sitenizin açılış hızını etkileyebilir. Yine de kullanılsın mı?")) {
-            input.value = ''; // Reset
-            return;
-        }
+    if (!GITHUB_TOKEN) {
+        alert("Lütfen önce sağ üstten Token girişi yapınız!");
+        input.value = '';
+        return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        const base64 = e.target.result;
-        const inputField = document.getElementById(targetId);
-        inputField.value = base64;
-    };
-    reader.readAsDataURL(file);
+    // Feedback UI (Simple approach finding sibling span)
+    const label = input.parentElement;
+    const span = label.querySelector('span');
+    const originalText = span ? span.textContent : "Resim Seç";
+
+    if (span) span.textContent = "⏳ Yükleniyor...";
+
+    try {
+        const timestamp = Date.now();
+        // Clean filename: remove spaces, special chars
+        const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '');
+        const path = `assets/images/${timestamp}-${cleanName}`;
+
+        // GitHub API needs plain Base64 (no data prefix)
+        const base64Full = await readFileAsBase64(file);
+        const content = base64Full.split(',')[1];
+
+        const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
+
+        const res = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Upload image via Admin Panel: ${cleanName}`,
+                content: content
+            })
+        });
+
+        if (res.ok) {
+            // Success
+            // We use the relative path so it works on the site
+            document.getElementById(targetId).value = path;
+
+            if (span) span.textContent = "✅ Yüklendi";
+            setTimeout(() => {
+                if (span) span.textContent = originalText;
+                // Clear input so same file can be selected again if needed
+                input.value = '';
+            }, 2000);
+        } else {
+            const err = await res.json();
+            throw new Error(err.message);
+        }
+
+    } catch (error) {
+        console.error("Upload Error:", error);
+        alert("Yükleme başarısız: " + error.message);
+        if (span) span.textContent = "❌ Hata";
+        setTimeout(() => { if (span) span.textContent = originalText; }, 2000);
+        input.value = '';
+    }
 }
 
 // --- NEW routing Logic ---
