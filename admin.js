@@ -191,8 +191,7 @@ function renderAdminList() {
 
 // Navigation
 function showProjectList() {
-    window.location.hash = '#list';
-    renderViewList();
+    window.location.hash = ''; // Clear hash to go to list
 }
 
 function renderViewList() {
@@ -202,7 +201,6 @@ function renderViewList() {
 
 function showEditForm() {
     window.location.hash = '#new';
-    renderEditForm();
 }
 
 function renderEditForm() {
@@ -229,19 +227,7 @@ window.editProject = (id) => {
     if (!project) return;
 
     window.location.hash = '#edit?id=' + id;
-    renderEditForm(); // We need to render form first, then populate it.
-    // Actually, populating logic was here. Let's keep it but separate purely visual switch.
-
-    document.getElementById('form-title').textContent = "Proje Düzenle";
-    document.getElementById('edit-id').value = project.id;
-    document.getElementById('edit-title').value = project.title;
-    document.getElementById('edit-desc').value = project.description;
-    document.getElementById('edit-image').value = project.image;
-    document.getElementById('edit-github').value = project.github;
-    document.getElementById('edit-demo').value = project.demo_url;
-    document.getElementById('edit-technologies').value = (project.technologies || []).join(', ');
-    document.getElementById('edit-details').value = project.details;
-    document.getElementById('edit-details-en').value = project.details_en || ""; // Populate English details
+    // Rendering handled by hashchange -> handleRouting
 };
 
 // Delete Action
@@ -276,7 +262,7 @@ window.saveProject = () => {
     }
 
     pushToGithub();
-    window.location.hash = '#list';
+    window.location.hash = ''; // Go back to list
 };
 
 // GitHub API Push
@@ -284,7 +270,7 @@ async function pushToGithub() {
     if (!GITHUB_TOKEN) {
         alert("GitHub Token eksik! Lütfen 'Token Gir' butonunu kullanın.\n(Şimdilik sadece yerel bellekte güncellendi, sayfa yenilenince kaybolur.)");
         renderAdminList();
-        showProjectList();
+        window.location.hash = ''; // List
         return;
     }
 
@@ -320,7 +306,7 @@ async function pushToGithub() {
         if (putRes.ok) {
             alert('Başarıyla GitHub\'a kaydedildi! Değişikliklerin siteye yansıması 1-2 dakika sürebilir.');
             renderAdminList();
-            showProjectList(); // This now sets hash to #list
+            window.location.hash = ''; // List
         } else {
             const err = await putRes.json();
             throw new Error(err.message);
@@ -345,7 +331,7 @@ async function pushToGithub() {
 
         alert(msg);
         renderAdminList(); // Update UI locally anyway
-        showProjectList(); // This now sets hash to #list
+        window.location.hash = ''; // List
     }
 }
 
@@ -495,12 +481,11 @@ function handleRouting() {
             document.getElementById('edit-details-en').value = project.details_en || "";
         } else {
             // ID not found, go back to list
-            window.location.hash = '#list';
+            window.location.hash = '';
             renderViewList();
         }
     } else {
-        // Default to list
-        if (hash !== '#list') window.location.hash = '#list';
+        // Default to list (Empty hash or #list)
         renderViewList();
     }
 }
