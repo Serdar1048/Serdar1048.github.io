@@ -116,13 +116,25 @@ function saveToken() {
         GITHUB_TOKEN = token;
         tokenModal.classList.add('hidden');
         dashboard.classList.remove('hidden');
-        fetchProjects(); // Renamed from loadProjects
+
+        // If we were in the middle of an action (like a failed push), maybe we should retry or just let the user click save again.
+        // For now, refreshing the list is safe.
+        fetchProjects();
+        alert('Token güncellendi! Lütfen işleminizi tekrar deneyin.');
     } else {
         alert('Lütfen geçerli bir token girin.');
     }
 }
 
-// Token Management (Removed setGithubToken as it's replaced by the modal flow)
+
+
+// Open Token Modal Manually
+window.openTokenModal = () => {
+    document.getElementById('token-input').value = ''; // Clear previous input for security/clean slate
+    tokenModal.classList.remove('hidden');
+};
+
+// Token Management
 
 // Logout Function
 window.logout = () => {
@@ -291,6 +303,13 @@ async function pushToGithub() {
             msg += '\n\nOlası Sebep: Repo adı ("' + REPO_NAME + '") bulunamadı veya Token yetkisi yetersiz.';
         } else if (error.message.includes('401') || error.message.includes('Bad credentials')) {
             msg += '\n\nOlası Sebep: GitHub Token geçersiz veya süresi dolmuş.';
+
+            // Auto-recovery: Clear invalid token and show modal
+            alert("GitHub Token süresi dolmuş! Lütfen yeni tokenı giriniz.");
+            localStorage.removeItem('github_token');
+            GITHUB_TOKEN = "";
+            openTokenModal();
+            return; // Stop further UI updates to keep the modal focused
         }
 
         alert(msg);
