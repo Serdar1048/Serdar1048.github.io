@@ -129,9 +129,21 @@ function saveToken() {
 
 
 // Open Token Modal Manually
+// Open Token Modal Manually
 window.openTokenModal = () => {
-    document.getElementById('token-input').value = ''; // Clear previous input for security/clean slate
-    tokenModal.classList.remove('hidden');
+    // Fetch elements dynamically to catch them even if DOM load was tricky
+    const modal = document.getElementById('token-modal');
+    const input = document.getElementById('token-input');
+
+    if (input) input.value = '';
+
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Force style just in case Tailwind hierarchy is weird
+        modal.style.display = 'flex';
+    } else {
+        alert("Hata: Token penceresi bulunamadı. Sayfayı yenilemeyi deneyin.");
+    }
 };
 
 // Token Management
